@@ -1,0 +1,204 @@
+openapi: 3.1.0
+
+info:
+  title: checklist-api
+  version: 0.1.0
+  summary: The governed content spine — the only executable content source.
+  description: |
+    Serves the catalogue: the only executable content source in the ecosystem.
+
+    **Application code must NEVER build an executable checklist by scanning source documents.**
+    Source prose is what the catalogue was authored *from*. The catalogue is generated, versioned and
+    pinned. Count from the catalogue, never from a document.
+
+    ## Scope boundary
+
+    Citadel is for **preparedness, exercise and improvement only**. It is explicitly **not** live
+    incident command or live incident operations, live triage or patient tracking during a real
+    event, clinical decision support, or facility certification or accreditation.
+
+    ## Conventions that are load-bearing
+
+    - **Every authenticated route answers `401`, never `404`.** An unknown path returns `404`, so a
+      `401` proves the route deployed. This is a free deployment check on every route.
+    - **Every refusal carries a named, printable reason** — never a bare status code. A refusal that
+      can be printed is a refusal that can be tested.
+    - **No comparative or cross-facility endpoint exists.** Absent, not permission-gated.
+    - **No sort parameter exists on any comparative field.** A list sorted by display name with a
+      sort parameter available is one query-string change from a league table.
+
+servers:
+  - url: https://api.example.invalid/content
+    description: Placeholder. The real host is an owner decision — hosting is conditional on the institutional position.
+
+tags:
+  - name: catalogue
+    description: Read approved, immutable content.
+  - name: operational
+    description: Health and deployment identity.
+
+paths:
+  /version:
+    get:
+      operationId: getVersion
+      tags: [operational]
+      summary: The deployed commit — the external deployment probe.
+      description: |
+        **The only unauthenticated route.** It makes "is this actually deployed?" answerable from
+        outside, without server access.
+
+        The prior build attempt shipped a release whose deployed bundle was byte-identical to the
+        release before it, with no external way to notice.
+      security: []
+      responses:
+        '200':
+          description: The running build.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [commit, service, startedAt]
+                properties:
+                  commit:
+                    type: string
+                    description: The exact SHA this build was produced from.
+                  service: { type: string, const: checklist-api }
+                  startedAt: { type: string, format: date-time }
+              example:
+                commit: 0000000000000000000000000000000000000000
+                service: checklist-api
+                startedAt: '2026-08-15T00:00:00Z'
+
+  /health:
+    get:
+      operationId: getHealth
+      tags: [operational]
+      summary: This service's own liveness — not the proxy's.
+      description: |
+        A proxy answering healthy while the service behind it is down is the classic false-green.
+        Monitoring reads **this**, not the proxy's endpoint.
+      security: []
+      responses:
+        '200':
+          description: Alive.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [status]
+                properties:
+                  status: { type: string, const: ok }
+
+  /catalogue/{version}/items/{id}:
+    get:
+      operationId: getCatalogueItem
+      tags: [catalogue]
+      summary: One catalogue item at a pinned catalogue version.
+      description: |
+        Returns an **approved, immutable** item. Drafts, returned drafts and deprecated versions are
+        invisible to consumers.
+
+        `version` may be `latest-approved` for browsing. **It must never be used when recording
+        anything** — evidence must reference the exact version it was assessed against.
+      parameters:
+        - name: version
+          in: path
+          required: true
+          description: An exact catalogue version, or `latest-approved` for browsing only.
+          schema:
+            oneOf:
+              - type: string
+                pattern: '^[0-9]+\.[0-9]+\.[0-9]+$'
+              - type: string
+                const: latest-approved
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^[A-Z]{2,4}-[A-Z]{3,6}-[0-9]{3}-i[0-9]{2}$'
+      responses:
+        '200':
+          description: The item.
+          headers:
+            X-Catalogue-Version:
+              description: The catalogue version this response was answered from. Every response states its provenance.
+              schema: { type: string }
+          content:
+            application/json:
+              schema:
+                $ref: '../schemas/catalogue/item.schema.json'
+        '401':
+          $ref: '#/components/responses/Unauthorised'
+        '403':
+          $ref: '#/components/responses/Refused'
+        '404':
+          description: |
+            No such item **at this catalogue version**. Note that an unknown *path* also returns 404 —
+            that is what makes a 401 on a known path meaningful.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Refusal' }
+
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: citadel_session
+      description: |
+        A short-lived signed access token issued by `identity-enrolment` and **validated locally by
+        signature** — consumers do not call the broker per request. It carries person, facility, seat,
+        role, grants version and expiry. **Nothing else** — no name, no email, no employment data.
+
+        Revocation latency is bounded by the token lifetime, stated plainly rather than promised as
+        immediate.
+
+  responses:
+    Unauthorised:
+      description: |
+        No valid session. **Every authenticated route answers 401, never 404** — so a 401 proves the
+        route deployed.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Refusal' }
+          example:
+            refusal: session-expired
+            message: Your session has expired. Sign in again.
+    Refused:
+      description: A named refusal.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Refusal' }
+          example:
+            refusal: unclassified-tool-may-not-be-executed
+            message: This tool has not been classified, so it cannot be executed.
+
+  schemas:
+    Refusal:
+      type: object
+      additionalProperties: false
+      required: [refusal, message]
+      description: |
+        **Every refusal is a named, printable value — never a bare boolean or status code.**
+
+        A `false` tells a test nothing about *which* rule fired, so a test asserting "this was
+        refused" passes even when the wrong rule refused it. Named refusals make the enforcement
+        layer legible in logs, in tests, and in the explanation shown to the user.
+
+        Every identifier here appears in `refusals/registry.json` with a localisation key.
+      properties:
+        refusal:
+          type: string
+          description: An identifier from the refusal registry.
+        message:
+          type: string
+          description: Resolved from the registry's locale key. Never a hardcoded literal.
+        detail:
+          type: object
+          additionalProperties: true
+
+security:
+  - sessionCookie: []

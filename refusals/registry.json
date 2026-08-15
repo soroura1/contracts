@@ -1,0 +1,177 @@
+{
+  "$comment": "Every refusal string in the ecosystem, in one place. A refusal that can be printed is a refusal that can be tested — and one registry makes them countable, localisable, and comparable across services. A consumer can render a meaningful message for a refusal from any service without knowing that service.",
+  "version": "0.1.0",
+  "refusals": [
+    {
+      "id": "session-expired",
+      "service": "identity-enrolment",
+      "meaning": "The access token is past its expiry. Revocation latency is bounded by this lifetime.",
+      "http": 401,
+      "userMessageKey": "refusal.session_expired",
+      "reachableInR0": true
+    },
+    {
+      "id": "session-invalid",
+      "service": "identity-enrolment",
+      "meaning": "The token signature did not verify, or the token is malformed.",
+      "http": 401,
+      "userMessageKey": "refusal.session_invalid",
+      "reachableInR0": true
+    },
+    {
+      "id": "participation-requires-facility-seat",
+      "service": "identity-enrolment",
+      "meaning": "Participation is by facility and seat, never by person. A person without a seat cannot participate.",
+      "http": 403,
+      "userMessageKey": "refusal.requires_facility_seat",
+      "reachableInR0": true
+    },
+
+    {
+      "id": "unclassified-tool-may-not-be-executed",
+      "service": "checklist-api",
+      "meaning": "The tool has no classification. `unclassified` is a real value, not an absence — and defaulting a classification is not a fix, because the classification is a judgement about what the tool is for.",
+      "http": 403,
+      "userMessageKey": "refusal.unclassified_tool",
+      "reachableInR0": false
+    },
+    {
+      "id": "specialist-review-required-before-execution",
+      "service": "checklist-api",
+      "meaning": "High-risk technical, clinical, structural, fire or hazardous-material content awaiting a qualified reviewer's signature. Readable and clearly labelled; not executable.",
+      "http": 403,
+      "userMessageKey": "refusal.specialist_review_required",
+      "reachableInR0": false
+    },
+    {
+      "id": "published-version-is-immutable",
+      "service": "checklist-api",
+      "meaning": "An approved version can never be edited. A change creates a new version and preserves the prior one.",
+      "http": 409,
+      "userMessageKey": "refusal.published_version_immutable",
+      "reachableInR0": false
+    },
+    {
+      "id": "reviewer-may-not-approve-own-version",
+      "service": "checklist-api",
+      "meaning": "Separation covers anybody who EDITED the version, not merely its recorded author — the stricter reading, and the correct one.",
+      "http": 403,
+      "userMessageKey": "refusal.reviewer_own_version",
+      "reachableInR0": false
+    },
+    {
+      "id": "insufficient-provenance",
+      "service": "checklist-api",
+      "meaning": "Required provenance metadata is missing. Provenance is per item, not per document.",
+      "http": 422,
+      "userMessageKey": "refusal.insufficient_provenance",
+      "reachableInR0": false
+    },
+    {
+      "id": "reproduction-permission-not-confirmed",
+      "service": "checklist-api",
+      "meaning": "Having a file does not imply permission to publish it. Publication requires confirmed or not-required permission.",
+      "http": 403,
+      "userMessageKey": "refusal.reproduction_permission",
+      "reachableInR0": false
+    },
+
+    {
+      "id": "reviewer-may-not-accept-own-evidence",
+      "service": "citadel",
+      "meaning": "The reviewer authored or edited this version.",
+      "http": 403,
+      "userMessageKey": "refusal.reviewer_own_evidence",
+      "reachableInR0": false
+    },
+    {
+      "id": "reviewer-may-not-accept-own-artifact",
+      "service": "citadel",
+      "meaning": "Same rule, applied to transfer artifacts from Chapter 4 onward.",
+      "http": 403,
+      "userMessageKey": "refusal.reviewer_own_artifact",
+      "reachableInR0": false
+    },
+    {
+      "id": "education-may-not-advance-capability-state",
+      "service": "citadel",
+      "meaning": "Reading is not doing. Refused at every named point, and asserted as an absence.",
+      "http": 403,
+      "userMessageKey": "refusal.education_not_progress",
+      "reachableInR0": false
+    },
+    {
+      "id": "exercise-may-not-write-evidence",
+      "service": "citadel",
+      "meaning": "A corrective action is a commitment, not an accomplishment. Asserted twice, as an absence.",
+      "http": 403,
+      "userMessageKey": "refusal.exercise_not_evidence",
+      "reachableInR0": false
+    },
+    {
+      "id": "unapproved-content-may-not-earn-progress",
+      "service": "citadel",
+      "meaning": "Only approved catalogue content earns. No progression tier may depend on content whose approval is pending.",
+      "http": 403,
+      "userMessageKey": "refusal.unapproved_content",
+      "reachableInR0": false
+    },
+    {
+      "id": "platform-admin-may-not-enter-facility",
+      "service": "citadel",
+      "meaning": "A privacy position, not an omission. It costs support capability, and that cost is accepted deliberately.",
+      "http": 403,
+      "userMessageKey": "refusal.admin_may_not_enter",
+      "reachableInR0": false
+    },
+    {
+      "id": "observation-record-has-no-review-state",
+      "service": "citadel",
+      "meaning": "Canon prohibits a formal assessment or transfer artifact in Chapters 1-3. An observation record has no review field to set — the absence is asserted on the shape, not enforced by a rule that could later be relaxed.",
+      "http": 409,
+      "userMessageKey": "refusal.observation_no_review",
+      "reachableInR0": false
+    },
+
+    {
+      "id": "facility-not-resolved",
+      "service": "identity-enrolment",
+      "meaning": "The external assertion's facility hint matched no claimed facility.",
+      "http": 409,
+      "userMessageKey": "refusal.facility_not_resolved",
+      "reachableInR0": false
+    },
+    {
+      "id": "facility-approval-pending",
+      "service": "identity-enrolment",
+      "meaning": "A NORMAL STATE, not an error. An unmatched facility queues an approval request rather than auto-creating a tenant — auto-creation would let anyone with an external account create one.",
+      "http": 202,
+      "userMessageKey": "refusal.facility_approval_pending",
+      "reachableInR0": false
+    },
+    {
+      "id": "external-subject-not-stable",
+      "service": "identity-enrolment",
+      "meaning": "The adapter's subject identifier is not stable and opaque. An email is not stable; a display name is not opaque. Keying on either means a person who changes it becomes a new person, losing their standing and their seat.",
+      "http": 422,
+      "userMessageKey": "refusal.subject_not_stable",
+      "reachableInR0": false
+    },
+    {
+      "id": "enrolment-rate-limited",
+      "service": "identity-enrolment",
+      "meaning": "Too many attempts. Rate limiting is present from R0 — the prior attempt had none anywhere, and credentials were attackable at full speed for fourteen releases.",
+      "http": 429,
+      "userMessageKey": "refusal.rate_limited",
+      "reachableInR0": true
+    },
+    {
+      "id": "request-rate-limited",
+      "service": "checklist-api",
+      "meaning": "Too many requests.",
+      "http": 429,
+      "userMessageKey": "refusal.rate_limited",
+      "reachableInR0": true
+    }
+  ]
+}

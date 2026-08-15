@@ -1,0 +1,23 @@
+{
+  "name": "@citadel/contracts",
+  "version": "0.1.0",
+  "description": "The interface between Citadel services. OpenAPI, JSON Schemas, the refusal registry, the conformance suite. Nothing runs here.",
+  "type": "module",
+  "license": "UNLICENSED",
+  "private": true,
+  "engines": { "node": ">=22" },
+  "exports": {
+    "./schemas/*": "./schemas/*",
+    "./openapi/*": "./openapi/*",
+    "./refusals": "./refusals/registry.json",
+    "./types": "./types/index.d.ts",
+    "./conformance": "./conformance/src/index.js"
+  },
+  "files": ["openapi", "schemas", "refusals", "types", "conformance", "VERSIONING.md"],
+  "scripts": {
+    "check": "./check-repo.sh && node conformance/src/validate-artifacts.js",
+    "types": "node scripts/generate-types.js",
+    "conformance": "node conformance/src/run.js",
+    "test": "node --test conformance/src/*.test.js"
+  }
+}
