@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://citadel.contracts/schemas/catalogue/tool.schema.json",
+  "title": "Tool",
+  "description": "A checklist, form, template, test or quick reference, with its items. The unit of AUTHORING and of the editorial lifecycle — items are the unit progress attaches to, but a tool is what a person reviews, approves and withdraws.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "version",
+    "title",
+    "purpose",
+    "authorityClass",
+    "classification",
+    "lifecycleState",
+    "provenance",
+    "items"
+  ],
+  "properties": {
+    "id": { "type": "string", "pattern": "^[A-Z]{2,4}-[A-Z]{3,6}-[0-9]{3}$" },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(-[a-z0-9-]+\\.[0-9]+)?$",
+      "description": "Semantic. A local adaptation appends a suffix — 1.2.0-facility-x.1 — so its lineage is visible in the version itself."
+    },
+    "title": { "$ref": "./item.schema.json#/$defs/localisedText" },
+    "purpose": { "$ref": "./item.schema.json#/$defs/localisedText" },
+
+    "authorityClass": {
+      "enum": ["A", "B", "C", "D"],
+      "description": "A = controlling or official. B = programme material requiring owner confirmation. C = derived implementation content, not automatically normative. D = product hypothesis. ADAPTING CLASS A CONTENT PRODUCES CLASS C — a facility that edits official guidance and keeps the class A label has created content claiming an authority it no longer has."
+    },
+    "classification": {
+      "enum": ["checklist", "form", "template", "test", "quick-reference", "mixed", "unclassified"],
+      "description": "An `unclassified` tool CANNOT BE EXECUTED. Defaulting is not a fix — the classification is a judgement about what the tool is for."
+    },
+    "dominantResponseType": {
+      "type": ["string", "null"],
+      "description": "What a user mostly does with it — binary confirmation, narrative finding, measurement, referral."
+    },
+    "specialistReferralRoute": { "type": ["string", "null"] },
+
+    "riskTier": {
+      "enum": ["general", "high"],
+      "default": "general",
+      "description": "Drives OFFLINE EXPIRY BEHAVIOUR. `general` warns and continues past expiry; `high` STOPS until connectivity confirms it has not been withdrawn. The staleness a hospital tolerates for a supply checklist is not what it tolerates for an evacuation instrument. Enforcement mechanism E14."
+    },
+    "specialistReviewRequired": { "type": "boolean", "default": false },
+    "specialistReviewSignedBy": { "type": ["string", "null"], "default": null },
+
+    "lifecycleState": {
+      "enum": ["draft", "in-review", "returned", "approved", "deprecated"],
+      "description": "Consumers read APPROVED only. A published version is NEVER edited — a change creates a new version and preserves the prior."
+    },
+    "withdrawnAt": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "default": null,
+      "description": "Every publication surface has a withdrawal path. The prior attempt had two lifecycles, one of which had no terminal state: content could be deprecated editorially and remain published indefinitely."
+    },
+
+    "provenance": { "$ref": "./item.schema.json#/$defs/provenance" },
+
+    "parent": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "default": null,
+      "description": "Set on a local adaptation. Retains the source's identity and history — adaptation must not destroy provenance.",
+      "required": ["toolId", "version", "authorityClass"],
+      "properties": {
+        "toolId": { "type": "string" },
+        "version": { "type": "string" },
+        "authorityClass": { "enum": ["A", "B", "C", "D"] },
+        "changeSummary": { "type": "string" },
+        "adaptedBy": { "type": "string" },
+        "adaptedAt": { "type": "string", "format": "date-time" }
+      }
+    },
+
+    "items": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "./item.schema.json" }
+    },
+
+    "editorial": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Who touched this version. REVIEWER SEPARATION COVERS ANYBODY WHO EDITED IT, not merely its recorded author — the stricter reading, and the correct one. An author who hands a draft to a colleague to 'just fix the wording' has not created an independent reviewer.",
+      "required": ["editors"],
+      "properties": {
+        "editors": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Every person who modified this version. The approver must appear in NEITHER this list nor as the author."
+        },
+        "submittedBy": { "type": ["string", "null"] },
+        "reviewedBy": { "type": ["string", "null"] },
+        "reviewedAt": { "type": ["string", "null"], "format": "date-time" },
+        "returnReason": { "type": ["string", "null"] }
+      }
+    }
+  }
+}

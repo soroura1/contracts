@@ -1,6 +1,6 @@
 {
-  "$comment": "Every refusal string in the ecosystem, in one place. A refusal that can be printed is a refusal that can be tested — and one registry makes them countable, localisable, and comparable across services. A consumer can render a meaningful message for a refusal from any service without knowing that service.",
-  "version": "0.1.0",
+  "$comment": "Every refusal string in the ecosystem, in one place. A refusal that can be printed is a refusal that can be tested \u2014 and one registry makes them countable, localisable, and comparable across services. A consumer can render a meaningful message for a refusal from any service without knowing that service.",
+  "version": "0.2.0",
   "refusals": [
     {
       "id": "session-expired",
@@ -26,11 +26,10 @@
       "userMessageKey": "refusal.requires_facility_seat",
       "reachableInR0": true
     },
-
     {
       "id": "unclassified-tool-may-not-be-executed",
       "service": "checklist-api",
-      "meaning": "The tool has no classification. `unclassified` is a real value, not an absence — and defaulting a classification is not a fix, because the classification is a judgement about what the tool is for.",
+      "meaning": "The tool has no classification. `unclassified` is a real value, not an absence \u2014 and defaulting a classification is not a fix, because the classification is a judgement about what the tool is for.",
       "http": 403,
       "userMessageKey": "refusal.unclassified_tool",
       "reachableInR0": false
@@ -54,7 +53,7 @@
     {
       "id": "reviewer-may-not-approve-own-version",
       "service": "checklist-api",
-      "meaning": "Separation covers anybody who EDITED the version, not merely its recorded author — the stricter reading, and the correct one.",
+      "meaning": "Separation covers anybody who EDITED the version, not merely its recorded author \u2014 the stricter reading, and the correct one.",
       "http": 403,
       "userMessageKey": "refusal.reviewer_own_version",
       "reachableInR0": false
@@ -75,7 +74,6 @@
       "userMessageKey": "refusal.reproduction_permission",
       "reachableInR0": false
     },
-
     {
       "id": "reviewer-may-not-accept-own-evidence",
       "service": "citadel",
@@ -127,12 +125,11 @@
     {
       "id": "observation-record-has-no-review-state",
       "service": "citadel",
-      "meaning": "Canon prohibits a formal assessment or transfer artifact in Chapters 1-3. An observation record has no review field to set — the absence is asserted on the shape, not enforced by a rule that could later be relaxed.",
+      "meaning": "Canon prohibits a formal assessment or transfer artifact in Chapters 1-3. An observation record has no review field to set \u2014 the absence is asserted on the shape, not enforced by a rule that could later be relaxed.",
       "http": 409,
       "userMessageKey": "refusal.observation_no_review",
       "reachableInR0": false
     },
-
     {
       "id": "facility-not-resolved",
       "service": "identity-enrolment",
@@ -144,7 +141,7 @@
     {
       "id": "facility-approval-pending",
       "service": "identity-enrolment",
-      "meaning": "A NORMAL STATE, not an error. An unmatched facility queues an approval request rather than auto-creating a tenant — auto-creation would let anyone with an external account create one.",
+      "meaning": "A NORMAL STATE, not an error. An unmatched facility queues an approval request rather than auto-creating a tenant \u2014 auto-creation would let anyone with an external account create one.",
       "http": 202,
       "userMessageKey": "refusal.facility_approval_pending",
       "reachableInR0": false
@@ -160,7 +157,7 @@
     {
       "id": "enrolment-rate-limited",
       "service": "identity-enrolment",
-      "meaning": "Too many attempts. Rate limiting is present from R0 — the prior attempt had none anywhere, and credentials were attackable at full speed for fourteen releases.",
+      "meaning": "Too many attempts. Rate limiting is present from R0 \u2014 the prior attempt had none anywhere, and credentials were attackable at full speed for fourteen releases.",
       "http": 429,
       "userMessageKey": "refusal.rate_limited",
       "reachableInR0": true
@@ -172,6 +169,54 @@
       "http": 429,
       "userMessageKey": "refusal.rate_limited",
       "reachableInR0": true
+    },
+    {
+      "id": "illegal-lifecycle-transition",
+      "service": "checklist-api",
+      "meaning": "That state change is not in the transition table. canTransition is the only way to move; there is no direct state assignment.",
+      "http": 409,
+      "userMessageKey": "refusal.illegal_transition",
+      "reachableInR0": false
+    },
+    {
+      "id": "deprecated-versions-are-immutable",
+      "service": "checklist-api",
+      "meaning": "A deprecated version is frozen. nextStates(deprecated) returns nothing.",
+      "http": 409,
+      "userMessageKey": "refusal.deprecated_immutable",
+      "reachableInR0": false
+    },
+    {
+      "id": "unknown-lifecycle-state",
+      "service": "checklist-api",
+      "meaning": "The state is not in the machine at all \u2014 a data defect, not a client error.",
+      "http": 500,
+      "userMessageKey": "refusal.unknown_state",
+      "reachableInR0": false
+    },
+    {
+      "id": "withdrawn-content-may-not-be-executed",
+      "service": "checklist-api",
+      "meaning": "Withdrawn content stays readable for the record and cannot be run as an instrument. Honoured before content is served, including offline.",
+      "http": 403,
+      "userMessageKey": "refusal.withdrawn_content",
+      "reachableInR0": false
+    },
+    {
+      "id": "cached-content-expired",
+      "service": "checklist-app",
+      "meaning": "Cached high-risk content is past its expiry and connectivity has not confirmed it is still current. General content warns and continues; high-risk stops. Enforcement mechanism E14.",
+      "http": 409,
+      "userMessageKey": "refusal.cached_expired",
+      "reachableInR0": false
+    },
+    {
+      "id": "local-adaptation-may-not-claim-parent-authority",
+      "service": "checklist-api",
+      "meaning": "Adapting class A or B content produces class C. A facility that edits official guidance and keeps the class A label has created content claiming an authority it no longer has.",
+      "http": 409,
+      "userMessageKey": "refusal.adaptation_authority",
+      "reachableInR0": false
     }
   ]
 }

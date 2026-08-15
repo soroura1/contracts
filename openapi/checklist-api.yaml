@@ -36,6 +36,10 @@ tags:
     description: Read approved, immutable content.
   - name: operational
     description: Health and deployment identity.
+  - name: governance
+    description: What is outstanding — computed, never written.
+  - name: authoring
+    description: Draft, submit, review, deprecate, withdraw. Platform operators, not facility members.
 
 paths:
   /version:
@@ -90,6 +94,128 @@ paths:
                 required: [status]
                 properties:
                   status: { type: string, const: ok }
+
+  /catalogue/{version}/tools:
+    get:
+      operationId: listTools
+      tags: [catalogue]
+      summary: Approved tools, filtered on the taxonomy axes.
+      description: |
+        The axes are **orthogonal, deliberately** — the same tool legitimately belongs to several,
+        and forcing one primary classification loses that.
+
+        **There is no `sort` parameter.** Results are ordered by identifier. A list sorted by display
+        name *with a sort parameter available* is one query-string change from a league table.
+      parameters:
+        - { name: version, in: path, required: true, schema: { type: string } }
+        - { name: phase, in: query, schema: { type: string } }
+        - { name: capabilityRoute, in: query, schema: { type: string } }
+        - { name: hazard, in: query, schema: { type: string } }
+        - { name: function, in: query, schema: { type: string } }
+        - { name: service, in: query, schema: { type: string } }
+        - { name: cursor, in: query, schema: { type: string } }
+      responses:
+        '200':
+          description: A stably ordered page of approved tools.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [tools, catalogueVersion]
+                properties:
+                  tools: { type: array, items: { $ref: '../schemas/catalogue/tool.schema.json' } }
+                  catalogueVersion: { type: string }
+                  nextCursor: { type: [string, 'null'] }
+        '401': { $ref: '#/components/responses/Unauthorised' }
+
+  /catalogue/{version}/tools/{toolId}:
+    get:
+      operationId: getTool
+      tags: [catalogue]
+      summary: One approved tool with its items.
+      parameters:
+        - { name: version, in: path, required: true, schema: { type: string } }
+        - { name: toolId, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: The tool.
+          content:
+            application/json:
+              schema: { $ref: '../schemas/catalogue/tool.schema.json' }
+        '401': { $ref: '#/components/responses/Unauthorised' }
+        '403':
+          description: |
+            Readable, but not executable — `unclassified-tool-may-not-be-executed`,
+            `specialist-review-required-before-execution`, or `withdrawn-content-may-not-be-executed`.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Refusal' }
+
+  /catalogue/{version}/bundle:
+    get:
+      operationId: getOfflineBundle
+      tags: [catalogue]
+      summary: An integrity-checked offline bundle of approved content.
+      description: |
+        Carries a `withdrawalList` and a `cachedAt`. **The withdrawal list is honoured before content
+        is served — regardless of bundle age**, so a withdrawn instrument stops even offline.
+
+        Expiry is **risk-tiered**: general content warns and continues; specialist-review and
+        high-risk content **stops** until connectivity confirms. Enforcement mechanism `E14`.
+      parameters:
+        - { name: version, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: The bundle.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [catalogueVersion, generatedAt, checksum, tools, withdrawalList]
+                properties:
+                  catalogueVersion: { type: string }
+                  generatedAt: { type: string, format: date-time }
+                  checksum: { type: string, description: SHA-256 over the canonical tool list. }
+                  tools: { type: array, items: { $ref: '../schemas/catalogue/tool.schema.json' } }
+                  withdrawalList:
+                    type: array
+                    items: { type: string }
+                    description: Tool identifiers withdrawn since publication. Honoured BEFORE content is served.
+        '401': { $ref: '#/components/responses/Unauthorised' }
+
+  /manifest:
+    get:
+      operationId: getGovernanceManifest
+      tags: [governance]
+      summary: The COMPUTED governance manifest — what is outstanding, derived not written.
+      description: |
+        **A governance register that cannot go stale.** Classify an item and it leaves the manifest
+        without anybody editing a document.
+
+        The prior attempt tracked this kind of debt in prose, and the prose was wrong: a matrix
+        carried four incorrect item counts and a right total.
+      responses:
+        '200':
+          description: What is outstanding, right now.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [generatedAt, unclassified, awaitingSpecialistReview, unconfirmedReproduction, insufficientProvenance, expired, untranslated]
+                properties:
+                  generatedAt: { type: string, format: date-time }
+                  unclassified: { type: array, items: { type: string } }
+                  awaitingSpecialistReview: { type: array, items: { type: string } }
+                  unconfirmedReproduction: { type: array, items: { type: string } }
+                  insufficientProvenance: { type: array, items: { type: string } }
+                  expired: { type: array, items: { type: string } }
+                  expiringSoon: { type: array, items: { type: string } }
+                  untranslated: { type: object, additionalProperties: true }
+                  orphanLocalVersions: { type: array, items: { type: string } }
+        '401': { $ref: '#/components/responses/Unauthorised' }
 
   /catalogue/{version}/items/{id}:
     get:

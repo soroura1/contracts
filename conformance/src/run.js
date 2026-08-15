@@ -169,8 +169,61 @@ async function absences() {
 }
 
 // ---------------------------------------------------------------------------
+// R1 — GOVERNANCE
+//
+// These assert that the rules hold THROUGH THE API, not merely in the domain.
+// A rule enforced in a function and bypassable through a route is not enforced.
+// ---------------------------------------------------------------------------
 
-const suites = [versionEndpoint, healthEndpoint, authConvention, namedRefusals, absences];
+async function governance() {
+  // The manifest is COMPUTED. Its presence is what makes governance debt visible
+  // rather than tracked in prose that goes stale.
+  const m = await get('/manifest');
+  record(
+    'GET /manifest exists — governance debt is computed, not written',
+    m.status === 200 || m.status === 401,
+    `got ${m.status}`,
+  );
+
+  if (m.status === 200) {
+    const required = [
+      'unclassified', 'awaitingSpecialistReview', 'unconfirmedReproduction',
+      'insufficientProvenance', 'expired',
+    ];
+    const missing = required.filter((k) => !Array.isArray(m.body?.[k]));
+    record(
+      'the manifest reports every governance category',
+      missing.length === 0,
+      missing.length ? `missing: ${missing.join(', ')}` : '',
+    );
+  }
+
+  // The tool list must not honour a sort parameter on anything comparative.
+  const sorted = await get('/catalogue/latest-approved/tools?sort=maturity');
+  const plain = await get('/catalogue/latest-approved/tools');
+  if (sorted.status === 200 && plain.status === 200) {
+    record(
+      'a sort parameter on the tool list is IGNORED, not honoured',
+      JSON.stringify(sorted.body?.tools) === JSON.stringify(plain.body?.tools),
+      'ordering changed when a sort parameter was supplied — one query-string change from a league table',
+    );
+  } else {
+    record('tool list is session-gated (401) rather than open', sorted.status === 401, `got ${sorted.status}`);
+  }
+
+  // An offline bundle must carry its withdrawal list — the list is honoured BEFORE
+  // content is served, so a bundle without one cannot honour it at all.
+  const b = await get('/catalogue/latest-approved/bundle');
+  record(
+    'the offline bundle is session-gated or carries a withdrawal list and a checksum',
+    b.status === 401 || (Array.isArray(b.body?.withdrawalList) && typeof b.body?.checksum === 'string'),
+    `got ${b.status}`,
+  );
+}
+
+// ---------------------------------------------------------------------------
+
+const suites = [versionEndpoint, healthEndpoint, authConvention, namedRefusals, absences, governance];
 
 console.log(`conformance → ${TARGET}\n`);
 for (const suite of suites) {

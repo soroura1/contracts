@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://citadel.contracts/schemas/catalogue/capability-block.schema.json",
+  "title": "Capability block",
+  "description": "A reusable, versioned unit of capability. THE REASON SHARED CREDIT WORKS: two items in different tools referencing ONE block read ONE record, so a facility doing that work is credited once — not once per checklist they happened to open. Journeys, hazard packs, department views and phase views are ORDERED SELECTIONS of the same blocks.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "version", "title", "description"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^cb-[a-z0-9-]+$" },
+    "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "title": { "$ref": "./item.schema.json#/$defs/localisedText" },
+    "description": { "$ref": "./item.schema.json#/$defs/localisedText" },
+    "referencedBy": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Item identifiers reading this block. COMPUTED, never authored — an authored list goes stale the moment an item is added."
+    }
+  }
+}
