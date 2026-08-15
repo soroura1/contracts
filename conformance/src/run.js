@@ -109,10 +109,14 @@ async function namedRefusals() {
     typeof id === 'string' && id.length > 0,
     `body was ${JSON.stringify(r.body)}`,
   );
+  const registered = knownRefusals.has(id);
   record(
     `the refusal "${id}" is in the registry`,
-    knownRefusals.has(id),
-    id ? `"${id}" is not registered — every refusal needs a registry entry and a locale key` : '',
+    registered,
+    // Detail only on FAILURE. An earlier version printed the failure text on a
+    // PASSING test — a signal that does not mean what it appears to say, which is
+    // exactly the defect class this suite exists to catch.
+    registered ? '' : `"${id}" is not registered — every refusal needs a registry entry and a locale key`,
   );
   record('a refusal carries a resolved message', typeof r.body?.message === 'string');
 }

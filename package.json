@@ -5,7 +5,9 @@
   "type": "module",
   "license": "UNLICENSED",
   "private": true,
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22.12"
+  },
   "exports": {
     "./schemas/*": "./schemas/*",
     "./openapi/*": "./openapi/*",
@@ -13,7 +15,14 @@
     "./types": "./types/index.d.ts",
     "./conformance": "./conformance/src/index.js"
   },
-  "files": ["openapi", "schemas", "refusals", "types", "conformance", "VERSIONING.md"],
+  "files": [
+    "openapi",
+    "schemas",
+    "refusals",
+    "types",
+    "conformance",
+    "VERSIONING.md"
+  ],
   "scripts": {
     "check": "./check-repo.sh && node conformance/src/validate-artifacts.js",
     "types": "node scripts/generate-types.js",
