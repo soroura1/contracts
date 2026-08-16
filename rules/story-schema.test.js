@@ -86,12 +86,15 @@ test('a decision with one option is refused — one option is not a decision', (
   assert.equal(validateDecision(d), false);
 });
 
-test('★ capability_block_ref does NOT carry a tool_id — blocks are shared across tools', () => {
+test('★ capability_block_ref IDENTITY excludes tool_id — blocks are shared across tools', () => {
   const s = load('scene.schema.json');
   const ref = s.$defs.capability_block_ref;
+  // tool_id exists (a surface must know which tool to open) but is NOT required,
+  // so it cannot be part of identity. A tool-scoped identity would give one block
+  // two identities and break shared credit.
   assert.deepEqual(ref.required, ['block_id', 'block_version', 'catalogue_version']);
-  assert.ok(!('tool_id' in ref.properties),
-    'a tool-scoped ref would give one block two identities and break shared credit');
+  assert.ok('tool_id' in ref.properties, 'context is needed to navigate to the tool');
+  assert.ok(!ref.required.includes('tool_id'), 'tool_id must never be part of identity');
 });
 
 test('every candidate scene and decision still validates against the adopted schema', () => {

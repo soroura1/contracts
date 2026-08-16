@@ -15,6 +15,19 @@ numbers, because no single file owned the sequence.
    who did not build it.
 3. Cutting a tag does not deploy it. See [CONTRIBUTING.md](CONTRIBUTING.md) § *The deploy gate*.
 
+## v0.3.1 — `tool_id` reconciled as context, not identity
+
+**17 August 2026.** Patch: additive optional field.
+
+`v0.3.0` omitted `tool_id` from `capability_block_ref` because a tool-scoped identity breaks shared
+credit. **Two specifications put it inside the ref** — `R3 B7` and
+`scene-and-quest-schema.md` § 6a — so omitting it left the contract disagreeing with the plan.
+
+> **Both readings are right about different things.** A surface needs to know **which tool to open**;
+> credit must attach to **the block**. So the field exists and is **excluded from identity**:
+> `required` stays `{block_id, block_version, catalogue_version}`, and anything comparing or
+> deduplicating refs ignores `tool_id`.
+
 ## v0.3.0 — the scene and decision contracts · R3 Phase B
 
 **17 August 2026.** Additive: no existing content becomes invalid, so a **minor** bump.
