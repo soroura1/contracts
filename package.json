@@ -28,7 +28,7 @@
   "scripts": {
     "check": "./check-repo.sh && node conformance/src/validate-artifacts.js",
     "types": "node scripts/generate-types.js",
-    "conformance": "node conformance/src/run.js",
+    "conformance": "node conformance/src/self.js",
     "test": "node --test rules/*.test.js"
   }
 }
