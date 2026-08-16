@@ -1,6 +1,6 @@
 {
   "name": "@citadel/contracts",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "The interface between Citadel services. OpenAPI, JSON Schemas, the refusal registry, the conformance suite. Nothing runs here.",
   "type": "module",
   "license": "UNLICENSED",

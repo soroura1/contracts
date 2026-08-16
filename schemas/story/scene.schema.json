@@ -550,7 +550,7 @@
         "block_version",
         "catalogue_version"
       ],
-      "description": "R3 B7. THE ONE DEFINITION. A reference to a catalogue capability block, so a scene decision binds to real facility capability rather than to prose.\n\nNOTE WHAT IS ABSENT: tool_id. R3-tasks.md proposed {tool_id, block_id, catalogue_version}, and that CONTRADICTS the shared-credit design -- capability-block.schema.json states that two items in two different tools referencing ONE block share credit. Binding a ref to a tool would give the same block two different refs depending on which tool you arrived through, and a facility doing one piece of work would be credited twice or not at all. The block is keyed (id, version); the ref is keyed the same way.",
+      "description": "R3 B7. THE ONE DEFINITION. A reference to a catalogue capability block, so a scene decision binds to real facility capability rather than to prose.\n\nNOTE WHAT IS NOT IDENTITY: tool_id. R3-tasks.md proposed {tool_id, block_id, catalogue_version}, and that CONTRADICTS the shared-credit design -- capability-block.schema.json states that two items in two different tools referencing ONE block share credit. Binding a ref to a tool would give the same block two different refs depending on which tool you arrived through, and a facility doing one piece of work would be credited twice or not at all. The block is keyed (id, version); the ref is keyed the same way.",
       "properties": {
         "block_id": {
           "type": "string",
@@ -562,6 +562,13 @@
         "catalogue_version": {
           "type": "string",
           "description": "Which catalogue version the ref was resolved against."
+        },
+        "tool_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "CONTEXT ONLY — where the player encountered this block. NOT part of the reference's identity.\n\nTwo specifications (R3 B7 and scene-and-quest-schema.md 6a) put tool_id INSIDE the ref. Taken as identity that breaks shared credit: a capability block is deliberately shared across tools, so the same block reached through two tools would carry two identities and a facility doing one piece of work would be credited twice or not at all.\n\nBoth readings are reconciled here: the field exists, because a surface needs to know which tool to open, and it is excluded from identity, because credit attaches to the block. Anything comparing or deduplicating refs uses block_id + block_version + catalogue_version."
         }
       }
     }
