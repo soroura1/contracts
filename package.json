@@ -1,6 +1,6 @@
 {
   "name": "@citadel/contracts",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "description": "The interface between Citadel services. OpenAPI, JSON Schemas, the refusal registry, the conformance suite. Nothing runs here.",
   "type": "module",
   "license": "UNLICENSED",
@@ -30,5 +30,9 @@
     "types": "node scripts/generate-types.js",
     "conformance": "node conformance/src/self.js",
     "test": "node --test rules/*.test.js"
+  },
+  "devDependencies": {
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1"
   }
 }

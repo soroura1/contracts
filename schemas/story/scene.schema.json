@@ -1,0 +1,569 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://citadel.contracts/schemas/story/scene.schema.json",
+  "title": "Scene",
+  "description": "A playable scene. ADOPTED from the R3 candidate draft (citadel-planning/10-content-candidates/chapter-01-bundle-v0.1) at sha256 fb177ccb0d9caaf7354d1e7e826c12a0998176b1aeef0bbf448380d86c488b53. That folder is now INPUT, not authority: this file is the schema. R3 B1.",
+  "type": "object",
+  "required": [
+    "id",
+    "chapter",
+    "locations",
+    "present",
+    "play_mode",
+    "orientation",
+    "desire",
+    "friction",
+    "choice_or_discovery",
+    "turn",
+    "residue",
+    "begins_after",
+    "ends_before",
+    "tension_axes",
+    "role_variants",
+    "creative_tests",
+    "text_equivalent",
+    "skippable",
+    "keyboard_reachable",
+    "required_reveals",
+    "real_world_bridge"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^sc-[0-9]{2}-[0-9]{2}$"
+    },
+    "chapter": {
+      "type": "string",
+      "pattern": "^ch-[0-9]{2}$"
+    },
+    "quests": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "locations": {
+      "description": "CORRECTION 1. Canon Scene 1 spans the Gate of Names, the Clinical Sorting Court and the emergency courts; Scene 2 spans three. A single location cannot express it.",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      }
+    },
+    "present": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "play_mode": {
+      "enum": [
+        "solo",
+        "small-team",
+        "facilitated",
+        "either"
+      ]
+    },
+    "orientation": {
+      "type": "object",
+      "required": [
+        "key",
+        "what_matters_now"
+      ],
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "what_matters_now": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "desire": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "character_id",
+          "wants"
+        ],
+        "properties": {
+          "character_id": {
+            "type": "string"
+          },
+          "wants": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "friction": {
+      "type": "string",
+      "minLength": 1
+    },
+    "choice_or_discovery": {
+      "description": "A scene with only orientation and no choice_or_discovery is the 'scene that only explains' failure, and is rejected.",
+      "type": "string",
+      "minLength": 1
+    },
+    "turn": {
+      "type": "string",
+      "minLength": 1
+    },
+    "residue": {
+      "type": "string",
+      "minLength": 1
+    },
+    "in_world_deadline": {
+      "description": "Dramatic and in-world. NEVER a real-time countdown, and never a scoring input (DEC-014).",
+      "type": "object",
+      "properties": {
+        "closes_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "consequence_if_missed": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "begins_after": {
+      "type": "string",
+      "minLength": 1
+    },
+    "ends_before": {
+      "type": "string",
+      "minLength": 1
+    },
+    "tension_axes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "axis",
+          "severity"
+        ],
+        "properties": {
+          "axis": {
+            "enum": [
+              "time",
+              "information",
+              "authority",
+              "resource",
+              "trust"
+            ]
+          },
+          "severity": {
+            "enum": [
+              "light",
+              "moderate",
+              "hard"
+            ]
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "role_variants": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "role_id",
+          "starting_position",
+          "information_held",
+          "options_available"
+        ],
+        "properties": {
+          "role_id": {
+            "type": "string"
+          },
+          "starting_position": {
+            "type": "string"
+          },
+          "information_held": {
+            "type": "string"
+          },
+          "options_available": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "required_reveals": {
+      "description": "CORRECTION 4. Canon guarantees the clue REGARDLESS of role. Every entry must be reachable on every selectable role path; reachable_on_all_role_paths records that this was checked, and the validator refuses false.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "what",
+          "reachable_on_all_role_paths"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "what": {
+            "type": "string",
+            "minLength": 1
+          },
+          "reachable_on_all_role_paths": {
+            "const": true
+          },
+          "how_each_role_reaches_it": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "role_id",
+                "route"
+              ],
+              "properties": {
+                "role_id": {
+                  "type": "string"
+                },
+                "route": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "real_world_bridge": {
+      "description": "CORRECTION 3. The Chapters 1-3 prohibition is enforced by the SCHEMA, not by prose or a grep: a canon-violating scene is unloadable. Canon states 'No formal assessment or transfer artifact is completed in Chapters 1-3.' For ch-01..ch-03, kind MUST be observation_record or none. 'artifact' is not an accepted value anywhere in this draft.",
+      "type": "object",
+      "required": [
+        "kind"
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "observation_record",
+            "none"
+          ]
+        },
+        "id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "gate": {
+      "type": "object",
+      "properties": {
+        "requires": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "variable",
+              "min_band"
+            ],
+            "properties": {
+              "variable": {
+                "$ref": "#/$defs/seasonVariable"
+              },
+              "min_band": {
+                "$ref": "#/$defs/band"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "on_fail": {
+          "type": "object",
+          "required": [
+            "substitute",
+            "absence_is_noticed"
+          ],
+          "properties": {
+            "substitute": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "absence_is_noticed": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "creative_tests": {
+      "description": "At least three must be true.",
+      "type": "object",
+      "required": [
+        "someone_wants_something_now",
+        "legitimate_need_in_tension",
+        "reveals_character_through_action",
+        "exposes_operational_dependency",
+        "player_decides_or_influences",
+        "consequence_can_return",
+        "advances_mystery",
+        "transfers_to_real_hospital"
+      ],
+      "properties": {
+        "someone_wants_something_now": {
+          "type": "boolean"
+        },
+        "legitimate_need_in_tension": {
+          "type": "boolean"
+        },
+        "reveals_character_through_action": {
+          "type": "boolean"
+        },
+        "exposes_operational_dependency": {
+          "type": "boolean"
+        },
+        "player_decides_or_influences": {
+          "type": "boolean"
+        },
+        "consequence_can_return": {
+          "type": "boolean"
+        },
+        "advances_mystery": {
+          "type": "boolean"
+        },
+        "transfers_to_real_hospital": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "text_equivalent": {
+      "type": "object",
+      "required": [
+        "key"
+      ],
+      "properties": {
+        "key": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "skippable": {
+      "const": true
+    },
+    "static_fallback": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "keyboard_reachable": {
+      "const": true
+    },
+    "asset_slots": {
+      "description": "Slot ids only, never file paths. A null or absent slot appears in the computed asset manifest as an unfilled slot, which is the point: the manifest is derived, never hand-maintained.",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^slot\\."
+      }
+    },
+    "unresolved": {
+      "description": "Where canon is silent, record it here rather than inventing a default. 'No invented defaults' is the same rule the content baseline applies to clinical and engineering thresholds.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "field",
+          "why"
+        ],
+        "properties": {
+          "field": {
+            "type": "string"
+          },
+          "why": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "$defs": {
+    "seasonVariable": {
+      "description": "The eleven engine variables, which check-plan.sh asserts map 1:1 to canon's eleven persistent consequence threads. An invented variable name fails the plan mechanically.",
+      "enum": [
+        "V1",
+        "V2",
+        "V3",
+        "V4",
+        "V5",
+        "V6",
+        "V7",
+        "V8",
+        "V9",
+        "V10",
+        "V11"
+      ]
+    },
+    "band": {
+      "enum": [
+        "critical",
+        "low",
+        "fragile",
+        "adequate",
+        "strong"
+      ]
+    },
+    "effect": {
+      "description": "CORRECTION 2. Typed operations, not direction plus magnitude alone. Canon assigns enum state (C1_CRITICAL_PATH = ED_HOLD | REDEPLOY | NETWORK_TRANSFER), which up/down cannot express.",
+      "type": "object",
+      "required": [
+        "operation",
+        "delay",
+        "visible"
+      ],
+      "oneOf": [
+        {
+          "properties": {
+            "operation": {
+              "const": "set_enum"
+            },
+            "enum_variable": {
+              "type": "string"
+            },
+            "enum_value": {
+              "type": "string"
+            },
+            "delay": {
+              "$ref": "#/$defs/delay"
+            },
+            "visible": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "operation",
+            "enum_variable",
+            "enum_value",
+            "delay",
+            "visible"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "properties": {
+            "operation": {
+              "enum": [
+                "increment",
+                "decrement"
+              ]
+            },
+            "variable": {
+              "$ref": "#/$defs/seasonVariable"
+            },
+            "magnitude": {
+              "enum": [
+                "slight",
+                "moderate",
+                "major"
+              ]
+            },
+            "delay": {
+              "$ref": "#/$defs/delay"
+            },
+            "visible": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "operation",
+            "variable",
+            "magnitude",
+            "delay",
+            "visible"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "properties": {
+            "operation": {
+              "const": "move_band"
+            },
+            "variable": {
+              "$ref": "#/$defs/seasonVariable"
+            },
+            "to_band": {
+              "$ref": "#/$defs/band"
+            },
+            "delay": {
+              "$ref": "#/$defs/delay"
+            },
+            "visible": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "operation",
+            "variable",
+            "to_band",
+            "delay",
+            "visible"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "delay": {
+      "enum": [
+        "immediate",
+        "next_chapter",
+        "act"
+      ]
+    },
+    "capability_block_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "block_id",
+        "block_version",
+        "catalogue_version"
+      ],
+      "description": "R3 B7. THE ONE DEFINITION. A reference to a catalogue capability block, so a scene decision binds to real facility capability rather than to prose.\n\nNOTE WHAT IS ABSENT: tool_id. R3-tasks.md proposed {tool_id, block_id, catalogue_version}, and that CONTRADICTS the shared-credit design -- capability-block.schema.json states that two items in two different tools referencing ONE block share credit. Binding a ref to a tool would give the same block two different refs depending on which tool you arrived through, and a facility doing one piece of work would be credited twice or not at all. The block is keyed (id, version); the ref is keyed the same way.",
+      "properties": {
+        "block_id": {
+          "type": "string",
+          "pattern": "^cb-[a-z0-9-]+$"
+        },
+        "block_version": {
+          "type": "string"
+        },
+        "catalogue_version": {
+          "type": "string",
+          "description": "Which catalogue version the ref was resolved against."
+        }
+      }
+    }
+  }
+}
