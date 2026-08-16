@@ -70,11 +70,15 @@ production, in the least obvious place.
 A **git tag dependency** to start — no registry, no auth, no publish step:
 
 ```json
-{ "dependencies": { "@citadel/contracts": "git+file://../contracts#v0.1.0" } }
+{ "dependencies": { "@citadel/contracts": "git+https://github.com/soroura1/contracts.git#v0.3.0" } }
 ```
 
 Moving to a private package registry later is a one-line change per consumer. **An untagged branch
-dependency is not acceptable at any stage.**
+dependency is not acceptable at any stage** — `check-repo.sh` refuses one.
+
+> ⚠️ This example previously read `git+file://../contracts#v0.1.0`, which is wrong twice: npm reads
+> `file://../x` as the absolute path `/x`, and `check-repo.sh` refuses a `file:` spec once a repo has
+> a remote. A local path is valid **only** before a remote exists.
 
 ---
 

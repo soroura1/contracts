@@ -1,0 +1,229 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://citadel.contracts/schemas/story/decision.schema.json",
+  "title": "Decision",
+  "description": "A decision inside a scene. EVERY OPTION PROTECTS SOMETHING LEGITIMATE AT A COST — an option with nothing to defend is not a decision, it is a wrong answer wearing a choice's clothes. R3 B3, B8.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "scene",
+    "prompt",
+    "requires_authority",
+    "reflection_required",
+    "options"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "scene": {
+      "type": "string"
+    },
+    "prompt": {
+      "$ref": "#/$defs/localisedText"
+    },
+    "requires_authority": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "type": "string"
+      },
+      "description": "WHICH ROLES hold the authority to decide — not whether authority is needed. A bare boolean cannot say who; a role not listed observes, and the interface can explain WHY it is observing. Same reasoning as named refusals over bare booleans."
+    },
+    "reflection_required": {
+      "type": "boolean"
+    },
+    "realistic_window": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The in-world time this would realistically take. DEC-014: an in-world deadline is permitted; speed is never scored."
+    },
+    "options": {
+      "type": "array",
+      "minItems": 2,
+      "description": "At least two. One option is not a decision.",
+      "items": {
+        "$ref": "#/$defs/option"
+      }
+    }
+  },
+  "$defs": {
+    "localisedText": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "key"
+      ],
+      "description": "No user-visible string is ever a literal.",
+      "properties": {
+        "key": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fallback": {
+          "type": "string"
+        }
+      }
+    },
+    "option": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "label",
+        "protects",
+        "risks",
+        "defensible_by",
+        "effects"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "label": {
+          "$ref": "#/$defs/localisedText"
+        },
+        "protects": {
+          "type": "string",
+          "minLength": 1,
+          "description": "What this option keeps safe. REQUIRED AND NON-EMPTY: every option must protect something legitimate."
+        },
+        "risks": {
+          "type": "string",
+          "minLength": 1
+        },
+        "defensible_by": {
+          "type": "string",
+          "minLength": 1,
+          "description": "★ WHO would defend this choice, and why. Non-empty is the test that the option is a real position held by real people — not a decoy. R3's definition of done asserts it."
+        },
+        "prerequisites": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "deferred_consequence": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "deliberately_asymmetric": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "★ THE REASON the asymmetry is deliberate, not a flag that it is. A boolean records that somebody noticed; a sentence records what they concluded — e.g. 'Canon assigns C1_FRONTLINE_TRUST -1 and names no compensating systemic gain.' An unbalanced option with no explanation is a design defect; with one, it is a design decision."
+        },
+        "effects": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/effect"
+          }
+        }
+      }
+    },
+    "effect": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "operation",
+        "delay",
+        "visible"
+      ],
+      "description": "CORRECTION 2 (R3 B3). Effects were `up|down` plus a magnitude, which cannot express canon's enum state — `C1_CRITICAL_PATH = ED_HOLD | REDEPLOY | NETWORK_TRANSFER`. Operations are typed, and an enum operation must name both the variable and the value.",
+      "properties": {
+        "operation": {
+          "enum": [
+            "set_enum",
+            "increment",
+            "decrement",
+            "set_band"
+          ],
+          "description": "set_enum names a discrete state. increment/decrement move a scalar. set_band moves a banded scale."
+        },
+        "enum_variable": {
+          "type": "string"
+        },
+        "enum_value": {
+          "type": "string"
+        },
+        "variable": {
+          "type": "string"
+        },
+        "magnitude": {
+          "enum": [
+            "slight",
+            "moderate",
+            "major"
+          ],
+          "description": "R3 B6. Canon writes +1/-1 and defines no mapping to these. The conversion is a recorded content judgement — see the decision log — and the owner may overturn it at the experience gate."
+        },
+        "band": {
+          "type": "string"
+        },
+        "delay": {
+          "enum": [
+            "immediate",
+            "later_this_chapter",
+            "next_chapter",
+            "later_season"
+          ],
+          "description": "★ The delayed consequence is the product's hardest and most valuable mechanic. It is expressible from R3 even though it PAYS OFF at R4 — building the vocabulary last is how the prior attempt ended with a story that had no payoff."
+        },
+        "visible": {
+          "type": "boolean",
+          "description": "Whether the player sees this effect land. An invisible immediate effect is how a consequence later reads as arbitrary."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "const": "set_enum"
+              }
+            },
+            "required": [
+              "operation"
+            ]
+          },
+          "then": {
+            "required": [
+              "enum_variable",
+              "enum_value"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "enum": [
+                  "increment",
+                  "decrement"
+                ]
+              }
+            },
+            "required": [
+              "operation"
+            ]
+          },
+          "then": {
+            "required": [
+              "variable",
+              "magnitude"
+            ]
+          }
+        }
+      ]
+    }
+  }
+}
