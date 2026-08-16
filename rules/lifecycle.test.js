@@ -10,7 +10,7 @@ import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   canTransition, canEdit, canApprove, canExecute, canPublish,
-  nextStates, isTerminal, adaptedAuthorityClass, offlineAvailability,
+  nextStates, isTerminal, adaptedAuthorityClass, canClaimAuthorityClass, offlineAvailability,
 } from './lifecycle.js';
 
 const tool = (o = {}) => ({
@@ -169,4 +169,65 @@ describe('★ offline expiry — risk-tiered (E14)', () => {
     assert.equal(r.available, false);
     assert.equal(r.refusal, 'withdrawn-content-may-not-be-executed');
   });
+});
+
+// ---------------------------------------------------------------------------
+// canClaimAuthorityClass — DEC-025.
+//
+// The first case is the one that happened: batch B1 shipped authorityClass A on
+// content adapted from PAHO guidance whose own rights page says adaptations are
+// "not endorsed by PAHO". Two rules existed. Neither could fire, because
+// `parent` requires a toolId and there was nowhere to say "adapted from an
+// external document".
+// ---------------------------------------------------------------------------
+test('★ content adapted from an EXTERNAL class A source may not claim class A', () => {
+  const b1 = {
+    authorityClass: 'A',
+    parent: null,
+    adaptedFrom: {
+      sourceDocument: 'Resilient Hospitals',
+      issuingBody: 'Pan American Health Organization',
+      sourceAuthorityClass: 'A',
+    },
+  };
+  const r = canClaimAuthorityClass(b1);
+  assert.equal(r.ok, false);
+  assert.equal(r.refusal, 'adaptation-may-not-claim-source-authority');
+  assert.equal(r.requiredClass, 'C');
+
+  // And the corrected form is permitted -- which is what proves the refusal above
+  // is about the CLAIM and not about adaptation itself.
+  assert.equal(canClaimAuthorityClass({ ...b1, authorityClass: 'C' }).ok, true);
+});
+
+test('a tool that is not an adaptation is unaffected', () => {
+  assert.equal(canClaimAuthorityClass({ authorityClass: 'A' }).ok, true);
+  assert.equal(canClaimAuthorityClass({ authorityClass: 'A', parent: null, adaptedFrom: null }).ok, true);
+});
+
+test('the LOCAL adaptation path still works, via parent', () => {
+  const local = { authorityClass: 'A', parent: { toolId: 'X', version: '1.0.0', authorityClass: 'A' } };
+  assert.equal(canClaimAuthorityClass(local).refusal, 'adaptation-may-not-claim-source-authority');
+  assert.equal(canClaimAuthorityClass({ ...local, authorityClass: 'C' }).ok, true);
+});
+
+test('★ the STRONGER source governs — authority cannot be laundered through a weak one', () => {
+  // Adapting class A guidance AND a class D local note is still class C. Taking
+  // the weaker source would let anyone relabel official material by citing a
+  // second, trivial one alongside it.
+  const both = {
+    authorityClass: 'D',
+    parent: { toolId: 'X', version: '1.0.0', authorityClass: 'D' },
+    adaptedFrom: { sourceDocument: 'S', issuingBody: 'B', sourceAuthorityClass: 'A' },
+  };
+  const r = canClaimAuthorityClass(both);
+  assert.equal(r.ok, false);
+  assert.equal(r.requiredClass, 'C');
+});
+
+test('adapting class C or D does not change the class', () => {
+  for (const c of ['C', 'D']) {
+    const t = { authorityClass: c, adaptedFrom: { sourceDocument: 'S', issuingBody: 'B', sourceAuthorityClass: c } };
+    assert.equal(canClaimAuthorityClass(t).ok, true);
+  }
 });

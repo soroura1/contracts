@@ -147,7 +147,7 @@ export function canPublish(tool) {
 }
 
 /**
- * The authority class a LOCAL ADAPTATION carries.
+ * The authority class an ADAPTATION carries.
  *
  * Adapting class A guidance produces class C — derived implementation content. A facility that
  * edits official guidance and keeps the class A label has created content claiming an authority it
@@ -155,6 +155,54 @@ export function canPublish(tool) {
  */
 export function adaptedAuthorityClass(parentClass) {
   return parentClass === 'A' || parentClass === 'B' ? 'C' : parentClass;
+}
+
+/**
+ * The authority class a tool MAY declare, given what it was adapted from.
+ *
+ * ============================================================================
+ * WHY THIS EXISTS — a rule that was correct and could not fire
+ * ============================================================================
+ * `adaptedAuthorityClass` above answers the question for a LOCAL adaptation of
+ * another catalogue tool, identified by `parent` (toolId + version).
+ *
+ * That is not the common case. Every INGESTED batch is an adaptation of an
+ * EXTERNAL SOURCE DOCUMENT, and there was no field in which to say so — so
+ * `adaptation_may_not_claim_parent_authority` in the database, which reads
+ * `parent_tool_id is null or ...`, exempted exactly the content it was written
+ * for. Batch B1 shipped `authorityClass: A` on adaptations of material whose
+ * own rights page says adaptations are "not endorsed by PAHO", and nothing in
+ * the schema or the database could object.
+ *
+ * The constraint was not unfired. It was UNFIREABLE, because the fact it keys
+ * on had nowhere to live. DEC-025.
+ *
+ * @param tool  a tool carrying `parent` and/or `adaptedFrom`
+ * @returns {{ok: true} | {ok: false, refusal: string, requiredClass: string}}
+ */
+export function canClaimAuthorityClass(tool) {
+  // Whichever source is declared, the STRONGER claim governs. A tool adapted
+  // from class A guidance is class C even if it also derives from a class D
+  // local note -- taking the weaker source would be a way to launder authority.
+  const sources = [
+    tool?.parent?.authorityClass,
+    tool?.adaptedFrom?.sourceAuthorityClass,
+  ].filter(Boolean);
+
+  if (sources.length === 0) return { ok: true };   // not an adaptation
+
+  const required = sources
+    .map(adaptedAuthorityClass)
+    .sort()[0];                                     // 'C' sorts before 'D'
+
+  if (tool.authorityClass !== required) {
+    return {
+      ok: false,
+      refusal: 'adaptation-may-not-claim-source-authority',
+      requiredClass: required,
+    };
+  }
+  return { ok: true };
 }
 
 /**
