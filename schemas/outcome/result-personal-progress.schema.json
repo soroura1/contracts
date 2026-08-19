@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "$id": "https://citadel.contracts/schemas/outcome/result-personal-progress.schema.json",
+  "title": "Result view \u2014 personal-progress",
+  "description": "What THIS participant did and learned. Person-scoped. No other participant appears in this payload. R4 B6. \u26a0\ufe0f FOUR SEPARATE PAYLOADS, and no payload may combine views. A payload holding a facility's capability beside another facility's is one query-string change from a league table \u2014 and DEC-005 is absolute: rank inquiry, never rank a hospital.",
+  "required": [
+    "participantRef"
+  ],
+  "properties": {
+    "participantRef": {
+      "type": "string"
+    },
+    "chaptersPlayed": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "recognitions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "For the QUALITY OF INQUIRY. 'Named the Gap' is the highest-value one \u2014 DEC-005."
+    }
+  },
+  "$comment": "NO SORT PARAMETER, and no comparative field, anywhere in this payload. check-repo.sh refuses one across every contract. A sort parameter on a comparative field IS the league table; it does not need a UI to become one."
+}

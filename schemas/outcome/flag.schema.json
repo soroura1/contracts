@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "$id": "https://citadel.contracts/schemas/outcome/flag.schema.json",
+  "title": "Flag",
+  "description": "A flag raised on content or a run. R4 B7. \u26a0\ufe0f SEPARATE FROM RESULTS, deliberately: a flag folded into a result payload becomes a mark against whoever the result is about, and the flag layer exists to surface a PROBLEM WITH THE CONTENT, not a judgement about a person.",
+  "required": [
+    "id",
+    "raisedAgainst",
+    "kind",
+    "reason",
+    "state"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "raisedAgainst": {
+      "type": "string",
+      "description": "A content or run reference. NEVER a participant."
+    },
+    "kind": {
+      "enum": [
+        "content-inaccurate",
+        "content-unsafe",
+        "content-unclear",
+        "binding-unresolvable"
+      ],
+      "description": "Every member is about the CONTENT. There is no member for 'this person did badly'."
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 1
+    },
+    "state": {
+      "enum": [
+        "open",
+        "accepted",
+        "declined",
+        "superseded"
+      ]
+    },
+    "resolution": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "default": null
+    }
+  },
+  "$comment": "`raisedAgainst` cannot name a participant and `kind` has no member about one \u2014 so a flag against a person is UNREPRESENTABLE. Gamify the learning behaviour, never the safety state, and never the person."
+}
