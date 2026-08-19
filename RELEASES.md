@@ -15,6 +15,41 @@ numbers, because no single file owned the sequence.
    who did not build it.
 3. Cutting a tag does not deploy it. See [CONTRIBUTING.md](CONTRIBUTING.md) § *The deploy gate*.
 
+## v0.4.0 — the outcome contracts · R4 Phase B
+
+**19 August 2026.** Additive: nine schemas, no existing content invalidated.
+
+| | |
+|---|---|
+| `observation-record` | ★ **The six boundaries, in the schema** |
+| `consequence`, `traceback` | The deferred mechanic's wire form |
+| `reflection` | The participant's own words |
+| `result-*` × 4 | **Four separate payloads**, never combined |
+| `flag` | Separate from results, and never about a person |
+
+### ★ Boundaries 2 and 3 are enforced by ABSENCE
+
+There is no `reviewState`, `approvedBy`, `completeness`, `evidenceStatus`, `capabilityCredit`,
+`recognition` or flag property anywhere in the observation record, and
+`additionalProperties: false`. So a record carrying one is **unrepresentable, not merely refused**.
+
+> That is stronger than a rule. A rule can be forgotten at the call site; a shape with no room for
+> the mistake cannot be. Canon prohibits a formal artifact before Chapter 4, and until now that
+> prohibition lived in prose, in a `check-plan.sh` grep, and in a comment — all three of which can be
+> walked past.
+
+**An absence nobody asserts is an absence somebody adds**, so each one is named in a test. Widening
+the schema is a failing test, not a quiet edit.
+
+### The other refusals worth naming
+
+- `player_could_have_known: true` **without** `foreshadowed_at` — telling a professional they should
+  have seen something never shown is a trick, not a lesson
+- A consequence with **one** account. Operational alone is felt by nobody; emotional alone has no cost
+- A result payload naming **more than one subject** — that is a combined view, and one query-string
+  change from a league table
+- A flag whose `kind` is about a person. Every member is about the content
+
 ## v0.3.1 — `tool_id` reconciled as context, not identity
 
 **17 August 2026.** Patch: additive optional field.
