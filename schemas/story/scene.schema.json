@@ -408,6 +408,46 @@
         },
         "additionalProperties": false
       }
+    },
+    "emotional_state": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "default": null,
+      "additionalProperties": false,
+      "required": [
+        "register",
+        "derivedFrom"
+      ],
+      "description": "V9. The scene's emotional register, which drives how it opens.\n\n⚠️ CANON ASSIGNS THE ARC PER CHAPTER, NOT PER SCENE. Chapter 1's is 'wonder -> professional belonging -> concentrated fear -> first unease' (one line, at chapter level). Distributing it across scenes is a DERIVATION, so `derivedFrom` carries the canon term the register came from and the two are never conflated.\n\n⚠️ AND THE VOCABULARIES DO NOT ALIGN. art-direction-and-asset-model.md section 2 defines seven registers with visual meanings; canon's 'concentrated fear' is not one of them. The register enum below is the art model's, because those are the terms with a defined visual register — a state with no defined register cannot drive anything.",
+      "properties": {
+        "register": {
+          "enum": [
+            "wonder",
+            "belonging",
+            "unease",
+            "pressure",
+            "loss",
+            "recognition",
+            "earned-hope"
+          ],
+          "description": "From art-direction-and-asset-model.md section 2. NOTE: that section says 'ten emotional states' and tabulates SEVEN. The three unlisted states have no defined visual register, so they are not enum members here — a member with no register would be a state nothing could render."
+        },
+        "derivedFrom": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The canon term this register was derived from, verbatim. Required so a reviewer can see the interpretation rather than inherit it."
+        },
+        "unresolved": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null,
+          "description": "Set when canon does not name a register for this scene, saying what is unresolved. Canon is read-only; where it is silent that silence is recorded, never filled in."
+        }
+      }
     }
   },
   "$defs": {
