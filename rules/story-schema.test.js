@@ -112,3 +112,35 @@ test('every candidate scene and decision still validates against the adopted sch
   }
   assert.equal(checked, 8, 'expected the four scenes and four decisions');
 });
+
+// --- V9: the emotional register ------------------------------------------------
+
+test('★ V9 — a register must carry the canon term it was DERIVED from', () => {
+  const s = scene();
+  // Canon assigns the arc per CHAPTER. A per-scene register is an interpretation,
+  // and `derivedFrom` is what keeps the interpretation visible to a reviewer
+  // instead of inherited as if it were canon.
+  s.emotional_state = { register: 'wonder' };
+  assert.equal(validateScene(s), false, 'a register with no derivation was accepted');
+
+  s.emotional_state = { register: 'wonder', derivedFrom: 'wonder' };
+  assert.ok(validateScene(s), JSON.stringify(validateScene.errors));
+});
+
+test('★ V9 — only registers with a DEFINED visual meaning are permitted', () => {
+  const s = scene();
+  // "concentrated fear" is canon's word and has no register in section 2 of the
+  // art model. A state nothing can render is a state that drives nothing.
+  s.emotional_state = { register: 'concentrated-fear', derivedFrom: 'concentrated fear' };
+  assert.equal(validateScene(s), false);
+
+  s.emotional_state = { register: 'pressure', derivedFrom: 'concentrated fear' };
+  assert.ok(validateScene(s), 'the mapped register is permitted, and the canon term is preserved');
+});
+
+test('V9 — a scene may declare its register UNRESOLVED rather than invent one', () => {
+  const s = scene();
+  s.emotional_state = { register: 'unease', derivedFrom: 'first unease',
+                        unresolved: 'canon names no register for this scene individually' };
+  assert.ok(validateScene(s));
+});

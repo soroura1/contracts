@@ -15,6 +15,26 @@ numbers, because no single file owned the sequence.
    who did not build it.
 3. Cutting a tag does not deploy it. See [CONTRIBUTING.md](CONTRIBUTING.md) § *The deploy gate*.
 
+## v0.4.1 — `emotional_state` on a scene · V9
+
+**19 August 2026.** Additive, optional.
+
+A scene may declare the emotional register that drives how it opens. **Two findings are encoded in
+the shape rather than left to the reader:**
+
+1. **Canon assigns the arc per CHAPTER, not per scene.** Chapter 1's is one line —
+   *wonder → professional belonging → concentrated fear → first unease*. Distributing it across four
+   scenes is a **derivation**, so `derivedFrom` is required and carries the canon term verbatim. The
+   interpretation stays visible instead of being inherited as canon.
+2. **The vocabularies do not align.** `art-direction-and-asset-model.md` § 2 defines seven registers
+   with visual meanings; canon's *"concentrated fear"* is not among them. The enum is the art
+   model's, because **a state with no defined register cannot drive anything**.
+
+> § 2 also says *"ten emotional states"* and tabulates **seven**. The three unlisted ones are not
+> enum members — a member with no register is a state nothing can render.
+
+`unresolved` lets a scene say canon is silent, rather than inventing a register to fill the gap.
+
 ## v0.4.0 — the outcome contracts · R4 Phase B
 
 **19 August 2026.** Additive: nine schemas, no existing content invalidated.
