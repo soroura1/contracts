@@ -15,6 +15,64 @@ numbers, because no single file owned the sequence.
    who did not build it.
 3. Cutting a tag does not deploy it. See [CONTRIBUTING.md](CONTRIBUTING.md) § *The deploy gate*.
 
+## v0.5.0 — the staged runtime contract · EVS-1
+
+**20 August 2026.** `DEC-030`. The Experience Vertical-Slice Gate's first development session.
+
+### The thing that had nowhere to live
+
+The Final Product Experience Contract's first presentation invariant, **FPE-01**, is that `turn`, the
+immediate effect, the state delta and `residue` are **not rendered before commitment**. The shipped
+renderer emits all six authored movements as one ordered `<ol>`, so the interface spoils its own
+drama — and **no rule could object, because the contract carried no field saying WHEN anything is
+presented.** The six movements are source material; the schema treated them as a display list.
+
+That is this project's recurring failure shape one layer earlier than usual. The usual form is a rule
+that is correct and cannot fire. This was a rule that could not be *written*.
+
+| Added to `schemas/story/scene.schema.json` | |
+|---|---|
+| `staging` | Four required phases — `pre_commit`, `interactive`, `post_commit`, `scene_exit` — each with its own `items` enum. `turn` and `residue` are **absent from the pre-commit enum**, and that absence is FPE-01 |
+| `immediate_effect` | The response beat's material, per committed option: `narrative_response`, `character_response`, `derived_from`, `unresolved`. `character_response` is an **array** because canon reacts in more than one voice — the closure characterization assigns Fadl, Maha *and* Rami a different action per pathway |
+| A top-level `if`/`then` | A scene that **stages** must carry its immediate effect. Staging can name a beat while the scene holds nothing to put in it, which renders as an empty phase — read by a player as a choice that did nothing |
+
+**The phase sequence is not data.** It is the object's four required keys, so a scene cannot declare
+its phases out of order; what a scene *can* get wrong is which movement sits in which phase, and each
+phase's enum is what refuses that. The all-at-once presentation — six movements in one phase, which
+is the shape shipping today — is **unrepresentable**.
+
+### What the schema will not let an author invent
+
+Chapter 1 canon authors, per pathway, the operational consequence and the state change. It authors
+**no post-commitment narration**, and it authors a character reaction for exactly one decision (the
+closure characterization, where Fadl, Maha and Rami each act differently per pathway). So:
+
+- the **state change is not restated** in the scene — `state_change_source` has one accepted value,
+  because there is one authority: the decision option's own typed `effects`;
+- a **null `narrative_response` requires both `derived_from` and `unresolved`** — otherwise "canon
+  authors no prose here" and "nobody wrote the response beat" are the same document.
+
+**Additive.** `staging` and `immediate_effect` are optional, the unstaged fixture and all four R3
+candidates still validate, and a consumer on `v0.4.1` is unaffected until it adopts them.
+
+⚠️ **Deliberately unresolved:** `immediate_effect.responses` is keyed by `option_id`, so a
+discovery-only scene — one whose `choice_or_discovery` is prose rather than a decision reference —
+cannot be represented. All four Chapter 1 scenes carry decisions, so nothing is blocked. A discovery
+shape is not invented here; EVS-4 is where discovery actions get defined.
+
+### Two defects in the generated types, found by regenerating
+
+Neither is EVS-1's subject; both shipped in `types/index.d.ts` from `v0.1.0` and were invisible
+because **nothing imports that file yet.**
+
+| | |
+|---|---|
+| `"a" \| "b"[]` | TypeScript binds `[]` tighter than `\|`, so this reads as `"a" \| ("b"[])`. Five properties had it; EVS-1 added three more, which is what made it worth fixing rather than propagating |
+| `in-review?: …` | A hyphen is not an identifier. **The file did not parse at all** |
+
+A generator that emits nonsense still exits 0, so `rules/types-generation.test.js` asserts the
+emitted text rather than the generator's exit code.
+
 ## v0.4.1 — `emotional_state` on a scene · V9
 
 **19 August 2026.** Additive, optional.

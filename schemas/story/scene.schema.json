@@ -448,6 +448,216 @@
           "description": "Set when canon does not name a register for this scene, saying what is unresolved. Canon is read-only; where it is silent that silence is recorded, never filled in."
         }
       }
+    },
+    "staging": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "default": null,
+      "additionalProperties": false,
+      "required": [
+        "pre_commit",
+        "interactive",
+        "post_commit",
+        "scene_exit"
+      ],
+      "description": "EVS-1. WHEN each authored movement is presented. The six movements are SOURCE MATERIAL, not six headings to display before the player acts (Final Product Experience Contract section 2).\n\nFPE-01 is the invariant this field exists to make enforceable: `turn`, the immediate effect, the state delta and `residue` are not rendered before commitment. Without staging there is nothing for a runtime to obey — the current renderer emits all six movements as one ordered document, so the interface spoils its own drama and no rule can object.\n\nWHY PER SCENE AND NOT A CONSTANT. Today all four Chapter 1 scenes stage identically, and identical data in four places is a place for drift. It is per-scene anyway because the `interactive` phase varies per scene the moment EVS-4 adds inspect/compare and consult/coordinate actions — and because a mapping that can be WRONG is a mapping the schema can refuse. A constant would make the refusal tests below unwritable.\n\nTHE PHASE SEQUENCE ITSELF IS NOT DATA. pre_commit -> interactive -> post_commit -> scene_exit is fixed by this object's four required keys, so a scene cannot declare its phases out of order. What a scene CAN get wrong is which movement sits in which phase, and each phase's `items` enum is what refuses that.",
+      "properties": {
+        "pre_commit": {
+          "description": "Arrive and encounter. What the player may see BEFORE they act. `turn` and `residue` are absent from this enum on purpose — that absence is FPE-01.",
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "orientation",
+              "desire",
+              "friction"
+            ]
+          }
+        },
+        "interactive": {
+          "description": "Investigate, coordinate, commit. EVS-1 has one member because the build has one player action; EVS-4 adds inspect/compare and consult/coordinate here. Members are not declared before the action they name exists — an enum member nothing can produce is a rule that cannot fire.",
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "choice_or_discovery"
+            ]
+          }
+        },
+        "post_commit": {
+          "description": "The response beat. FPE-02: a commitment receives an immediate causal response BEFORE navigation advances. `contains` makes `immediate_effect` mandatory here, so a scene cannot stage a response beat with nothing in it.",
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "contains": {
+            "const": "immediate_effect"
+          },
+          "items": {
+            "enum": [
+              "turn",
+              "immediate_effect"
+            ]
+          }
+        },
+        "scene_exit": {
+          "description": "What is left behind. `residue` is the only member, so residue staged anywhere else is refused by this enum and residue staged here is the only accepted form.",
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "residue"
+            ]
+          }
+        }
+      }
+    },
+    "immediate_effect": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "default": null,
+      "additionalProperties": false,
+      "required": [
+        "state_change_source",
+        "responses"
+      ],
+      "description": "EVS-1. The response beat's material, per committed option.\n\n★ THE STATE CHANGE IS NOT RESTATED HERE. It is the chosen option's own typed `effects` with `visible: true`, which decision.schema.json already governs. Copying them into the scene would be one shape defined twice — the defect `generate-types.js` exists to prevent, one layer up.\n\n★ AND THE PROSE IS NOT INVENTED HERE. Chapter 1 canon authors, per pathway, the operational consequence and the state change; it authors no post-commitment narration. So `narrative_response` is null wherever canon is silent, and `derived_from` names the authored material the runtime composes the beat from instead. A null response with nothing to derive from would be an empty beat wearing a required field's name, which is why null requires both `derived_from` and `unresolved`.\n\n⚠️ UNRESOLVED, DELIBERATELY: a discovery-only scene. `responses` is keyed by `option_id`, so a scene whose `choice_or_discovery` is prose rather than a decision reference cannot be represented. All four Chapter 1 scenes carry decisions, so nothing is blocked; a discovery shape is not invented here because EVS-4 is where discovery actions get defined and inventing one now would fix the wrong shape first.",
+      "properties": {
+        "state_change_source": {
+          "const": "decision_effects",
+          "description": "Where the player-observable state change comes from. One accepted value, because there is one authority: the decision option's typed effects."
+        },
+        "responses": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "option_id",
+              "narrative_response",
+              "character_response"
+            ],
+            "properties": {
+              "option_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "narrative_response": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "additionalProperties": false,
+                "required": [
+                  "key"
+                ],
+                "properties": {
+                  "key": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "description": "Authored post-commitment prose, as a locale key. Null where canon authors none."
+              },
+              "character_response": {
+                "type": [
+                  "array",
+                  "null"
+                ],
+                "minItems": 1,
+                "description": "Who reacts, and how. AN ARRAY, because canon reacts in more than one voice: the Chapter 1 closure characterization assigns Fadl, Maha AND Rami a different action per pathway, and a single-character shape would have forced two of the three to be dropped. Null where canon is silent -- never filled in.",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "character_id",
+                    "responds"
+                  ],
+                  "properties": {
+                    "character_id": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "responds": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  }
+                }
+              },
+              "derived_from": {
+                "type": "array",
+                "uniqueItems": true,
+                "items": {
+                  "enum": [
+                    "protects",
+                    "risks",
+                    "effects"
+                  ]
+                },
+                "description": "Which authored material the runtime composes the response from when `narrative_response` is null. FPE-03 requires the response to name both the protected value and the cost, and `protects` + `risks` are exactly those, already authored on the option."
+              },
+              "unresolved": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "field",
+                    "why"
+                  ],
+                  "properties": {
+                    "field": {
+                      "type": "string"
+                    },
+                    "why": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  }
+                },
+                "description": "Same convention as the scene's own `unresolved`: where canon is silent, say so rather than invent a default."
+              }
+            },
+            "allOf": [
+              {
+                "description": "A null narrative response must have something to derive the beat from, and must say what is owed. Otherwise \"no prose authored\" and \"no response beat at all\" are the same document.",
+                "if": {
+                  "properties": {
+                    "narrative_response": {
+                      "type": "null"
+                    }
+                  },
+                  "required": [
+                    "narrative_response"
+                  ]
+                },
+                "then": {
+                  "required": [
+                    "derived_from",
+                    "unresolved"
+                  ],
+                  "properties": {
+                    "derived_from": {
+                      "minItems": 1
+                    },
+                    "unresolved": {
+                      "minItems": 1
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
     }
   },
   "$defs": {
@@ -612,5 +822,30 @@
         }
       }
     }
-  }
+  },
+  "allOf": [
+    {
+      "description": "A staged scene MUST carry its immediate effect. `staging.post_commit` is required to contain `immediate_effect`; without this, a scene could name the response beat in its staging and hold nothing to put in it — a phase that renders empty, which reads to a player as a choice that did nothing.",
+      "if": {
+        "required": [
+          "staging"
+        ],
+        "properties": {
+          "staging": {
+            "type": "object"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "immediate_effect"
+        ],
+        "properties": {
+          "immediate_effect": {
+            "type": "object"
+          }
+        }
+      }
+    }
+  ]
 }

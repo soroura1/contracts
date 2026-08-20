@@ -1,7 +1,23 @@
 # `contracts` — status
 
-**Last updated:** 2026-08-17 · **Latest tag:** `v0.2.2`
+**Last updated:** 2026-08-20 · **Latest tag:** `v0.5.0`
 **Topology:** [`../CLAUDE.md`](../CLAUDE.md) — read before proposing any port, path or hostname.
+
+## ★ The scene contract now says WHEN, not only WHAT — `v0.5.0`, EVS-1
+
+`staging` maps each authored movement to one of four phases (`pre_commit`, `interactive`,
+`post_commit`, `scene_exit`), and `turn` and `residue` are **absent from the pre-commit enum**. That
+absence is `FPE-01`: the interface may not spoil its own drama.
+
+> **Why it did not exist before.** The six movements are source material, and the schema treated them
+> as a display list. So the renderer emitted all six as one `<ol>` — and **no rule could object,
+> because there was no field to key on.** The usual failure here is a rule that cannot fire; this was
+> a rule that could not be written.
+
+⚠️ **The cross-field rules are NOT here.** Each of the six movements staged exactly once, and
+`responses` covering every option of the scene's decision, live in `citadel/src/engine/staging.js`.
+`VERSIONING.md`: a rule no other service consumes costs a tag-and-pin cycle per change and buys
+nothing (`DEC-009`). Only `citadel` loads scenes.
 
 ## What this is
 

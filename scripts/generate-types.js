@@ -46,7 +46,18 @@ function typeOf(schema, defs, indent = '  ') {
     else if (one === 'number' || one === 'integer') parts.push('number');
     else if (one === 'boolean') parts.push('boolean');
     else if (one === 'null') parts.push('null');
-    else if (one === 'array') parts.push(`${typeOf(schema.items ?? {}, defs, indent)}[]`);
+    else if (one === 'array') {
+      // ⚠️ A UNION MEMBER MUST BE PARENTHESISED BEFORE `[]`.
+      //
+      // `"a" | "b"[]` is not an array of two strings — TypeScript binds `[]`
+      // tighter than `|`, so it reads as `"a" | ("b"[])`. Five shipped types
+      // already had this shape (capabilityRoute, phase, entity, in-review,
+      // immutableStates) and it was invisible because nothing consumes the
+      // types yet. EVS-1 added three more, which is what made it worth fixing
+      // rather than propagating.
+      const item = typeOf(schema.items ?? {}, defs, indent);
+      parts.push(item.includes(' | ') ? `(${item})[]` : `${item}[]`);
+    }
     else if (one === 'object') parts.push(objectOf(schema, defs, indent));
     else parts.push('unknown');
   }
@@ -59,7 +70,12 @@ function objectOf(schema, defs, indent) {
   const inner = indent + '  ';
   const lines = Object.entries(schema.properties).map(([key, prop]) => {
     const doc = prop.description ? `${inner}/** ${prop.description.replace(/\s+/g, ' ')} */\n` : '';
-    return `${doc}${inner}${key}${req.has(key) ? '' : '?'}: ${typeOf(prop, defs, inner)};`;
+    // ⚠️ A PROPERTY NAME THAT IS NOT A VALID IDENTIFIER MUST BE QUOTED.
+    // `in-review?: ...` is a syntax error, not a hyphenated key -- lifecycle
+    // states use hyphens, so the generated file did not parse at all. Nothing
+    // imports it yet, which is exactly why nobody found out.
+    const name = /^[A-Za-z_$][A-Za-z0-9_$]*$/.test(key) ? key : JSON.stringify(key);
+    return `${doc}${inner}${name}${req.has(key) ? '' : '?'}: ${typeOf(prop, defs, inner)};`;
   });
   return `{\n${lines.join('\n')}\n${indent}}`;
 }
