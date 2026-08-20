@@ -33,7 +33,7 @@ that is correct and cannot fire. This was a rule that could not be *written*.
 | Added to `schemas/story/scene.schema.json` | |
 |---|---|
 | `staging` | Four required phases — `pre_commit`, `interactive`, `post_commit`, `scene_exit` — each with its own `items` enum. `turn` and `residue` are **absent from the pre-commit enum**, and that absence is FPE-01 |
-| `immediate_effect` | The response beat's material, per committed option: `narrative_response`, `character_response`, `derived_from`, `unresolved` |
+| `immediate_effect` | The response beat's material, per committed option: `narrative_response`, `character_response`, `derived_from`, `unresolved`. `character_response` is an **array** because canon reacts in more than one voice — the closure characterization assigns Fadl, Maha *and* Rami a different action per pathway |
 | A top-level `if`/`then` | A scene that **stages** must carry its immediate effect. Staging can name a beat while the scene holds nothing to put in it, which renders as an empty phase — read by a player as a choice that did nothing |
 
 **The phase sequence is not data.** It is the object's four required keys, so a scene cannot declare

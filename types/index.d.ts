@@ -471,11 +471,11 @@ export type Scene = {
         narrative_response: {
           key: string;
         } | null;
-        /** Who reacts, and how. Canon authors this for the Chapter 1 closure characterization (Fadl, Maha and Rami each act differently per pathway) and for no other decision. Null where canon is silent — never filled in. */
+        /** Who reacts, and how. AN ARRAY, because canon reacts in more than one voice: the Chapter 1 closure characterization assigns Fadl, Maha AND Rami a different action per pathway, and a single-character shape would have forced two of the three to be dropped. Null where canon is silent -- never filled in. */
         character_response: {
           character_id: string;
           responds: string;
-        } | null;
+        }[] | null;
         /** Which authored material the runtime composes the response from when `narrative_response` is null. FPE-03 requires the response to name both the protected value and the cost, and `protects` + `risks` are exactly those, already authored on the option. */
         derived_from?: ("protects" | "risks" | "effects")[];
         /** Same convention as the scene's own `unresolved`: where canon is silent, say so rather than invent a default. */

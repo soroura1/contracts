@@ -258,18 +258,24 @@ test('an AUTHORED narrative response needs no unresolved entry — the rule keys
   assert.ok(validateScene(s), JSON.stringify(validateScene.errors));
 });
 
-test('★ a character response is expressible — canon authors three of them for the closure', () => {
-  // Chapter 1 Scene 4 assigns Fadl, Maha and Rami a different action per
-  // pathway. If this shape only ever held null, the field would be decoration.
+test('★ a character response holds MORE THAN ONE VOICE — canon reacts in three', () => {
+  // Chapter 1 Scene 4 assigns Fadl, Maha AND Rami a different action per
+  // pathway. A single-character shape would have forced two of the three to be
+  // dropped, which is why this is an array -- found by reading the content, not
+  // by designing the field.
   const s = staged();
-  s.immediate_effect.responses[0].character_response = {
-    character_id: 'Fadl',
-    responds: 'Retains the high-risk near-miss classification and names an owner and review time.',
-  };
+  s.immediate_effect.responses[0].character_response = [
+    { character_id: 'Fadl', responds: 'Retains the high-risk near-miss classification.' },
+    { character_id: 'Maha', responds: 'Links the raw chronology to the quality record.' },
+    { character_id: 'Rami', responds: 'Refuses "restored" as a synonym for "corrected".' },
+  ];
   assert.ok(validateScene(s), JSON.stringify(validateScene.errors));
 
-  s.immediate_effect.responses[0].character_response = { character_id: 'Fadl' };
+  s.immediate_effect.responses[0].character_response = [{ character_id: 'Fadl' }];
   assert.equal(validateScene(s), false, 'a character who reacts must react with something');
+
+  s.immediate_effect.responses[0].character_response = [];
+  assert.equal(validateScene(s), false, 'an empty list is not "canon is silent" — null is');
 });
 
 test('the state change is NOT restated in the scene — it has one authority', () => {

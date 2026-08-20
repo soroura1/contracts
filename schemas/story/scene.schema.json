@@ -568,25 +568,29 @@
               },
               "character_response": {
                 "type": [
-                  "object",
+                  "array",
                   "null"
                 ],
-                "additionalProperties": false,
-                "required": [
-                  "character_id",
-                  "responds"
-                ],
-                "properties": {
-                  "character_id": {
-                    "type": "string",
-                    "minLength": 1
-                  },
-                  "responds": {
-                    "type": "string",
-                    "minLength": 1
+                "minItems": 1,
+                "description": "Who reacts, and how. AN ARRAY, because canon reacts in more than one voice: the Chapter 1 closure characterization assigns Fadl, Maha AND Rami a different action per pathway, and a single-character shape would have forced two of the three to be dropped. Null where canon is silent -- never filled in.",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "character_id",
+                    "responds"
+                  ],
+                  "properties": {
+                    "character_id": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "responds": {
+                      "type": "string",
+                      "minLength": 1
+                    }
                   }
-                },
-                "description": "Who reacts, and how. Canon authors this for the Chapter 1 closure characterization (Fadl, Maha and Rami each act differently per pathway) and for no other decision. Null where canon is silent — never filled in."
+                }
               },
               "derived_from": {
                 "type": "array",

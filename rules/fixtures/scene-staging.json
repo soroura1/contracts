@@ -12,7 +12,7 @@
     "state_change_source": "decision_effects",
     "responses": [
       {
-        "option_id": "dec-01-gate-access.name-an-owner",
+        "option_id": "dec-01-gate-access.assign-owner",
         "narrative_response": null,
         "character_response": null,
         "derived_from": ["protects", "risks", "effects"],
@@ -22,7 +22,7 @@
         ]
       },
       {
-        "option_id": "dec-01-gate-access.help-personally",
+        "option_id": "dec-01-gate-access.keep-schedule",
         "narrative_response": null,
         "character_response": null,
         "derived_from": ["protects", "risks"],
