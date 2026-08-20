@@ -1,6 +1,6 @@
 # `contracts` — status
 
-**Last updated:** 2026-08-20 · **Latest tag:** `v0.6.0`
+**Last updated:** 2026-08-20 · **Latest tag:** `v0.7.0`
 **Topology:** [`../CLAUDE.md`](../CLAUDE.md) — read before proposing any port, path or hostname.
 
 ## ★ The scene contract now says WHEN, not only WHAT — `v0.5.0`, EVS-1
@@ -52,7 +52,12 @@ B1. When you write a rule, ask **what makes it fire, and whether that thing is e
 ## Releases
 
 `v0.1.0` R0 · `v0.2.0` R1 lifecycle + governance · `v0.2.1` conformance double + self-runner ·
-`v0.2.2` `adaptedFrom` (`DEC-025`) · **`v0.3.0` scene + decision contracts, R3 Phase B**.
+`v0.2.2` `adaptedFrom` (`DEC-025`) · `v0.3.0`–`v0.3.1` scene + decision contracts, R3 Phase B ·
+`v0.4.0` outcome contracts · `v0.4.1` `emotional_state` · `v0.5.0` staging + immediate effect ·
+`v0.5.1` `bell` · `v0.6.0` actions + evidence · **`v0.7.0` the asset slot becomes a declaration**.
+
+⚠️ **`v0.7.0` is BREAKING** — `asset_slots` went from strings to objects. `RELEASES.md` carries the
+migration note; `citadel` is the only consumer and migrated in the same wave.
 
 ⚠️ **`R3-tasks.md` says `v0.4.0`.** It assumed R2's identity contract would ship first as `v0.3.0`.
 **R2 Phase B has not started**, and versioning here is **semantic, not release-coupled** — so the

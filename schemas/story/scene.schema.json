@@ -391,11 +391,113 @@
       "const": true
     },
     "asset_slots": {
-      "description": "Slot ids only, never file paths. A null or absent slot appears in the computed asset manifest as an unfilled slot, which is the point: the manifest is derived, never hand-maintained.",
       "type": "array",
+      "description": "EVS-5. A DECLARED SLOT, NOT A FILE PATH — and an OBJECT, not a string.\n\n⚠️ THIS WAS A BARE STRING UNTIL v0.7.0, AND THE COMPUTED MANIFEST HAD NEVER SEEN A REAL SLOT ID. The consumer's manifest reads `slot.id` and `slot.asset_id`; the content shipped `\"slot.ch01.gate-of-names\"`. Every one of Chapter 1's eight slots was reported as `sc-01-01:?`, and the rule refusing a REQUIRED slot — the rule that keeps play from depending on an image — read `slot.required` on a string and could never fire. Both looked correct. Both were tested against object fixtures the content never produced.\n\nOne shape, therefore. Two shapes for one thing is what produced this.",
       "items": {
-        "type": "string",
-        "pattern": "^slot\\."
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "kind",
+          "alt_key",
+          "max_bytes",
+          "inclusion_reviewed"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^slot\\."
+          },
+          "kind": {
+            "enum": [
+              "environment",
+              "prop",
+              "character",
+              "plan",
+              "instrument"
+            ]
+          },
+          "alt_key": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The locale key for the alt text. Declared with the slot, so a slot cannot be filled without one — an image with no text equivalent removes an access path that nobody notices is missing until somebody needs it."
+          },
+          "max_bytes": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "The weight budget, declared BEFORE binding. The audience is on slow connections; a budget agreed after the art arrives is a budget the art sets."
+          },
+          "crop": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "default": null,
+            "description": "The reviewed crop, where one has been agreed. Null until the design package exists."
+          },
+          "candidate_ref": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "default": null,
+            "description": "A concept reference — VA-00n in the story record. A CANDIDATE is not a binding: incidental architectural, costume, equipment and emblem details do not become canon by appearing in an image."
+          },
+          "inclusion_reviewed": {
+            "type": "boolean",
+            "default": false,
+            "description": "⚠️ FALSE UNTIL AN INCLUSION REVIEWER HAS SEEN IT (Q10). Binding a candidate as canonical without that review is the thing the gate exists to prevent; building against a slot is not."
+          },
+          "reviewed_by": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "default": null
+          },
+          "states": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "string"
+            },
+            "description": "The operational states this slot must eventually carry — an outage location needs at least two. Declared with the slot so the requirement exists before the art does."
+          },
+          "candidate_file": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "default": null,
+            "description": "The file a candidate currently resolves to, where one has been produced. Named on the SLOT so a surface renders what the slot declares rather than a map it keeps of its own — the play surface hardcoded two filenames until v0.7.0, which is a second inventory of the art beside the manifest. Still a candidate: inclusion_reviewed governs whether it may be treated as canonical, and it is false everywhere."
+          }
+        },
+        "allOf": [
+          {
+            "description": "A slot claiming review must name the reviewer. An unattributed review is an assertion, and the same discipline governs content approval one repository over.",
+            "if": {
+              "properties": {
+                "inclusion_reviewed": {
+                  "const": true
+                }
+              },
+              "required": [
+                "inclusion_reviewed"
+              ]
+            },
+            "then": {
+              "required": [
+                "reviewed_by"
+              ],
+              "properties": {
+                "reviewed_by": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          }
+        ]
       }
     },
     "unresolved": {
@@ -913,6 +1015,16 @@
           }
         }
       }
+    },
+    "location_ids": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^loc\\."
+      },
+      "description": "EVS-5. WHERE THE SCENE IS, AS REFERENCES.\n\n⚠️ ALONGSIDE `locations`, NOT INSTEAD OF IT — and the duplication is deliberate. `locations` holds canon's own phrases: \"older ICU far bay\", \"the service passage to the electrical transfer chamber\". Those are the writer's voice and they belong in the scene. `location_ids` are the machine's, and they resolve against a place model that can say what is next door and what changed there.\n\nReplacing the prose with ids would lose canon's wording; matching the ids to the prose by string comparison would be a resemblance standing in for a reference, which is the mistake `required_reveals.evidence_ids` was added to avoid one field over. Same pattern as `derivedFrom`: the source stays, and the link is explicit.\n\nThe place model itself is NOT here. Nothing but the game consumes locations, and VERSIONING.md is explicit that a rule no other service consumes buys nothing by being published (DEC-009). It lives in citadel as `src/content/places.json`."
     }
   },
   "$defs": {

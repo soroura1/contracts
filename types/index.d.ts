@@ -438,8 +438,26 @@ export type Scene = {
     skippable: true;
     static_fallback?: string | null;
     keyboard_reachable: true;
-    /** Slot ids only, never file paths. A null or absent slot appears in the computed asset manifest as an unfilled slot, which is the point: the manifest is derived, never hand-maintained. */
-    asset_slots?: string[];
+    /** EVS-5. A DECLARED SLOT, NOT A FILE PATH — and an OBJECT, not a string. ⚠️ THIS WAS A BARE STRING UNTIL v0.7.0, AND THE COMPUTED MANIFEST HAD NEVER SEEN A REAL SLOT ID. The consumer's manifest reads `slot.id` and `slot.asset_id`; the content shipped `"slot.ch01.gate-of-names"`. Every one of Chapter 1's eight slots was reported as `sc-01-01:?`, and the rule refusing a REQUIRED slot — the rule that keeps play from depending on an image — read `slot.required` on a string and could never fire. Both looked correct. Both were tested against object fixtures the content never produced. One shape, therefore. Two shapes for one thing is what produced this. */
+    asset_slots?: ({
+      id: string;
+      kind: "environment" | "prop" | "character" | "plan" | "instrument";
+      /** The locale key for the alt text. Declared with the slot, so a slot cannot be filled without one — an image with no text equivalent removes an access path that nobody notices is missing until somebody needs it. */
+      alt_key: string;
+      /** The weight budget, declared BEFORE binding. The audience is on slow connections; a budget agreed after the art arrives is a budget the art sets. */
+      max_bytes: number;
+      /** The reviewed crop, where one has been agreed. Null until the design package exists. */
+      crop?: string | null;
+      /** A concept reference — VA-00n in the story record. A CANDIDATE is not a binding: incidental architectural, costume, equipment and emblem details do not become canon by appearing in an image. */
+      candidate_ref?: string | null;
+      /** ⚠️ FALSE UNTIL AN INCLUSION REVIEWER HAS SEEN IT (Q10). Binding a candidate as canonical without that review is the thing the gate exists to prevent; building against a slot is not. */
+      inclusion_reviewed: boolean;
+      reviewed_by?: string | null;
+      /** The operational states this slot must eventually carry — an outage location needs at least two. Declared with the slot so the requirement exists before the art does. */
+      states?: string[];
+      /** The file a candidate currently resolves to, where one has been produced. Named on the SLOT so a surface renders what the slot declares rather than a map it keeps of its own — the play surface hardcoded two filenames until v0.7.0, which is a second inventory of the art beside the manifest. Still a candidate: inclusion_reviewed governs whether it may be treated as canonical, and it is false everywhere. */
+      candidate_file?: string | null;
+    })[];
     /** Where canon is silent, record it here rather than inventing a default. 'No invented defaults' is the same rule the content baseline applies to clinical and engineering thresholds. */
     unresolved?: {
       field: string;
@@ -540,6 +558,8 @@ export type Scene = {
       } | null;
       derivedFrom: string;
     })[] | null;
+    /** EVS-5. WHERE THE SCENE IS, AS REFERENCES. ⚠️ ALONGSIDE `locations`, NOT INSTEAD OF IT — and the duplication is deliberate. `locations` holds canon's own phrases: "older ICU far bay", "the service passage to the electrical transfer chamber". Those are the writer's voice and they belong in the scene. `location_ids` are the machine's, and they resolve against a place model that can say what is next door and what changed there. Replacing the prose with ids would lose canon's wording; matching the ids to the prose by string comparison would be a resemblance standing in for a reference, which is the mistake `required_reveals.evidence_ids` was added to avoid one field over. Same pattern as `derivedFrom`: the source stays, and the link is explicit. The place model itself is NOT here. Nothing but the game consumes locations, and VERSIONING.md is explicit that a rule no other service consumes buys nothing by being published (DEC-009). It lives in citadel as `src/content/places.json`. */
+    location_ids?: string[];
   };
 
 /** Every refusal identifier in the ecosystem. A refusal not in this union does not exist. */

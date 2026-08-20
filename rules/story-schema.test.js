@@ -485,3 +485,103 @@ test('EVS-4 is ADDITIVE — a scene with no actions still validates', () => {
   assert.ok(validateScene(staged()), JSON.stringify(validateScene.errors));
   assert.ok(validateScene(scene()));
 });
+
+// --- EVS-5: the asset slot is a DECLARATION -------------------------------------
+//
+// ⚠️ HOW THIS WAS FOUND. The consumer's computed asset manifest reads `slot.id`
+// and `slot.asset_id`. The content shipped bare strings. So all eight of
+// Chapter 1's slots were reported as `sc-01-01:?`, and the rule refusing a
+// REQUIRED slot — the rule that keeps play from depending on an image — read
+// `slot.required` on a string and could never fire.
+//
+// Both looked correct. Both were tested against object fixtures the content
+// never produced. This is the third instance this month of one shape: a rule
+// tested on a form the real data does not take.
+
+const slot = () => ({
+  id: 'slot.ch01.gate-of-names', kind: 'environment',
+  alt_key: 'art.gate_of_names.alt', max_bytes: 300000,
+  crop: null, candidate_ref: 'VA-004', inclusion_reviewed: false, reviewed_by: null,
+});
+
+test('★ EVS-5 — a declared slot validates, and a bare string no longer does', () => {
+  const s = scene();
+  s.asset_slots = [slot()];
+  assert.ok(validateScene(s), JSON.stringify(validateScene.errors));
+
+  s.asset_slots = ['slot.ch01.gate-of-names'];
+  assert.equal(validateScene(s), false, 'two shapes for one thing is what produced the defect');
+});
+
+test('★ a slot must declare its ALT TEXT and its WEIGHT BUDGET before anything fills it', () => {
+  // An image with no text equivalent removes an access path nobody notices is
+  // missing until somebody needs it. A budget agreed after the art arrives is
+  // a budget the art sets.
+  for (const field of ['alt_key', 'max_bytes', 'kind', 'id', 'inclusion_reviewed']) {
+    const s = scene();
+    const one = slot();
+    delete one[field];
+    s.asset_slots = [one];
+    assert.equal(validateScene(s), false, `a slot with no ${field} was accepted`);
+  }
+  const ok = scene();
+  ok.asset_slots = [slot()];
+  assert.ok(validateScene(ok));
+});
+
+test('★ a slot claiming inclusion review must NAME the reviewer', () => {
+  // An unattributed review is an assertion. The same discipline governs content
+  // approval one repository over, where `canApprove` reads the editor list.
+  const s = scene();
+  s.asset_slots = [{ ...slot(), inclusion_reviewed: true }];
+  assert.equal(validateScene(s), false, 'a review with no reviewer was accepted');
+
+  s.asset_slots = [{ ...slot(), inclusion_reviewed: true, reviewed_by: 'the named inclusion reviewer' }];
+  assert.ok(validateScene(s), JSON.stringify(validateScene.errors));
+
+  // ...and an unreviewed slot is a perfectly good slot. Building against one is
+  // not what the gate forbids; BINDING a candidate as canonical is.
+  s.asset_slots = [slot()];
+  assert.ok(validateScene(s));
+});
+
+test('a slot may declare the operational STATES it must eventually carry', () => {
+  // An outage location needs at least two, and the requirement should exist
+  // before the art does rather than being discovered when one state is drawn.
+  const s = scene();
+  s.asset_slots = [{ ...slot(), states: ['supplied', 'interrupted'] }];
+  assert.ok(validateScene(s), JSON.stringify(validateScene.errors));
+
+  s.asset_slots = [{ ...slot(), states: ['supplied', 'supplied'] }];
+  assert.equal(validateScene(s), false, 'one state named twice is one state');
+});
+
+test('a candidate reference is not a binding', () => {
+  // "Incidental architectural, costume, equipment, and emblem details do not
+  // become story canon merely because they appear in an image."
+  const s = scene();
+  s.asset_slots = [{ ...slot(), candidate_ref: 'VA-004', inclusion_reviewed: false }];
+  assert.ok(validateScene(s));
+  const declared = s.asset_slots[0];
+  assert.equal(declared.inclusion_reviewed, false);
+  assert.equal(declared.crop, null, 'no crop is agreed until a design package exists');
+});
+
+test('★ EVS-5 — a scene may name its locations as REFERENCES as well as prose', () => {
+  // ⚠️ ALONGSIDE, not instead of. `locations` holds canon's own phrases — "older
+  // ICU far bay" — and those are the writer's voice. `location_ids` resolve
+  // against a place model that can say what is next door and what changed
+  // there. Matching one to the other by string comparison would be a
+  // resemblance standing in for a reference, which is the mistake
+  // `required_reveals.evidence_ids` was added to avoid one field over.
+  const s = scene();
+  s.location_ids = ['loc.gate-of-names', 'loc.sorting-court'];
+  assert.ok(validateScene(s), JSON.stringify(validateScene.errors));
+  assert.ok(s.locations.length > 0, 'canon\'s own phrases stay');
+
+  s.location_ids = ['gate-of-names'];
+  assert.equal(validateScene(s), false, 'a location reference must look like one');
+
+  s.location_ids = [];
+  assert.equal(validateScene(s), false, 'a scene that names locations must name at least one');
+});
