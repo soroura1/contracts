@@ -15,6 +15,41 @@ numbers, because no single file owned the sequence.
    who did not build it.
 3. Cutting a tag does not deploy it. See [CONTRIBUTING.md](CONTRIBUTING.md) § *The deploy gate*.
 
+## v0.7.0 — the asset slot becomes a declaration · EVS-5
+
+**20 August 2026.** `DEC-030`.
+
+### ⚠️ Breaking, and named as such
+
+`asset_slots` was an array of **strings**. It is now an array of **objects**, and a string is
+refused. Per `VERSIONING.md` a content-schema change that invalidates existing content is a breaking
+change: this is `0.x`, so the minor position carries it, and the migration note names **every
+consumer — `citadel`, the only one — migrated in the same wave.**
+
+### How this was found
+
+The consumer's computed asset manifest reads `slot.id` and `slot.asset_id`. The content shipped
+`"slot.ch01.gate-of-names"`.
+
+> **All eight of Chapter 1's slots were reported as `sc-01-01:?`.** And
+> `assertPlayableWithoutArt` — the rule that keeps play from depending on an image — read
+> `slot.required` on a string, so it could never fire.
+
+Both looked correct. **Both were tested against object fixtures the content never produced.** That is
+the third instance this month of one shape: a rule exercised only on a form the real data does not
+take.
+
+| A slot now declares | Why before anything fills it |
+|---|---|
+| `alt_key` | An image with no text equivalent removes an access path nobody notices is missing until somebody needs it |
+| `max_bytes` | A budget agreed after the art arrives is a budget the art sets |
+| `kind`, `crop`, `states` | An outage location needs at least two operational states, and the requirement should exist before the art does |
+| `candidate_ref` | A concept reference. **A candidate is not a binding** — incidental architectural, costume, equipment and emblem details do not become canon by appearing in an image |
+| `inclusion_reviewed` + `reviewed_by` | A slot claiming review must **name the reviewer**. An unattributed review is an assertion, and the same discipline governs content approval one repository over |
+
+**Building against an unreviewed slot is not what the gate forbids. Binding a candidate as canonical
+is.**
+
 ## v0.6.0 — actions, evidence and role-filtered discovery · EVS-4
 
 **20 August 2026.** `DEC-030`.
