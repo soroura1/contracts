@@ -15,6 +15,57 @@ numbers, because no single file owned the sequence.
    who did not build it.
 3. Cutting a tag does not deploy it. See [CONTRIBUTING.md](CONTRIBUTING.md) § *The deploy gate*.
 
+## v0.6.0 — actions, evidence and role-filtered discovery · EVS-4
+
+**20 August 2026.** `DEC-030`.
+
+### The two action types are canon's, not a games checklist's
+
+Canon asks for both by name:
+
+> *"place detailed timings in **optional inspection** or the later review rather than long crisis
+> dialogue"*
+>
+> *"The selected role supplies one direct authority. The player must **seek other judgments** from
+> named clinical, nursing, operational, safety, information, and city partners."*
+
+So `inspect` and `consult` were transcribed, not designed. The third — commit — already existed as
+`choice_or_discovery`. `staging.interactive` gains `actions`, which **EVS-1 predicted in its own
+schema description**: *"members are not declared before the action they name exists — an enum member
+nothing can produce is a rule that cannot fire."*
+
+| Added to `scene.schema.json` | |
+|---|---|
+| `evidence` | What can be learned, each item carrying **its source** and whether it is `partial` |
+| `actions` | `inspect` or `consult`, a target, what it `reveals`, `visible_to_roles`, an optional `requires`, an optional character `response`, an optional `cost` |
+| `required_reveals[].evidence_ids` | The reveal wired to evidence **by id** |
+
+### Why evidence carries a source
+
+Chapter 1 turns on two people reading accurate information in different rooms and reaching different
+conclusions — the Hall sees *"backup generation active"*, the far bay sees no supply. **An engine
+holding one true world state cannot express that. One holding who-said-what can.**
+
+### ⚠️ A cost is a declared note, never a quantity
+
+Canon names the currencies — *"a cost in time, trust, workload, service capacity, or evidence"* — and
+attaches them to unsafe proposals and the fail-forward. **It sets no prices.** So `cost` carries a
+currency and a sentence, an `amount` is unrepresentable, and a currency canon did not name is
+refused. A number invented here would be a score wearing a lore costume, which `DEC-005` exists to
+prevent.
+
+### `risk_requires_evidence` — FPE-05, inverted
+
+Until now every option's risk was unconditionally visible, which reads as a briefing rather than as
+something learned. An option may now withhold its `risks` until the participant holds the evidence
+that makes it knowable.
+
+⚠️ **`protects` is never gated**, and no field exists to gate it — an option whose protection is
+hidden is not a position anyone can weigh. That every decision keeps at least one ungated risk is a
+cross-option rule the consumer enforces, because a schema cannot see across options.
+
+**Additive.** A scene with no actions and a decision with no gate both still validate.
+
 ## v0.5.1 — `bell` on a scene · V7, and the check that found it missing
 
 **20 August 2026.**
