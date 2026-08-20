@@ -556,6 +556,8 @@ export type Scene = {
       } | null;
       derivedFrom: string;
     })[] | null;
+    /** EVS-5. WHERE THE SCENE IS, AS REFERENCES. ⚠️ ALONGSIDE `locations`, NOT INSTEAD OF IT — and the duplication is deliberate. `locations` holds canon's own phrases: "older ICU far bay", "the service passage to the electrical transfer chamber". Those are the writer's voice and they belong in the scene. `location_ids` are the machine's, and they resolve against a place model that can say what is next door and what changed there. Replacing the prose with ids would lose canon's wording; matching the ids to the prose by string comparison would be a resemblance standing in for a reference, which is the mistake `required_reveals.evidence_ids` was added to avoid one field over. Same pattern as `derivedFrom`: the source stays, and the link is explicit. The place model itself is NOT here. Nothing but the game consumes locations, and VERSIONING.md is explicit that a rule no other service consumes buys nothing by being published (DEC-009). It lives in citadel as `src/content/places.json`. */
+    location_ids?: string[];
   };
 
 /** Every refusal identifier in the ecosystem. A refusal not in this union does not exist. */

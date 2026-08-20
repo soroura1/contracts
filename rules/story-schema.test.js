@@ -566,3 +566,22 @@ test('a candidate reference is not a binding', () => {
   assert.equal(declared.inclusion_reviewed, false);
   assert.equal(declared.crop, null, 'no crop is agreed until a design package exists');
 });
+
+test('★ EVS-5 — a scene may name its locations as REFERENCES as well as prose', () => {
+  // ⚠️ ALONGSIDE, not instead of. `locations` holds canon's own phrases — "older
+  // ICU far bay" — and those are the writer's voice. `location_ids` resolve
+  // against a place model that can say what is next door and what changed
+  // there. Matching one to the other by string comparison would be a
+  // resemblance standing in for a reference, which is the mistake
+  // `required_reveals.evidence_ids` was added to avoid one field over.
+  const s = scene();
+  s.location_ids = ['loc.gate-of-names', 'loc.sorting-court'];
+  assert.ok(validateScene(s), JSON.stringify(validateScene.errors));
+  assert.ok(s.locations.length > 0, 'canon\'s own phrases stay');
+
+  s.location_ids = ['gate-of-names'];
+  assert.equal(validateScene(s), false, 'a location reference must look like one');
+
+  s.location_ids = [];
+  assert.equal(validateScene(s), false, 'a scene that names locations must name at least one');
+});
