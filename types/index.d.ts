@@ -455,6 +455,8 @@ export type Scene = {
       reviewed_by?: string | null;
       /** The operational states this slot must eventually carry — an outage location needs at least two. Declared with the slot so the requirement exists before the art does. */
       states?: string[];
+      /** The file a candidate currently resolves to, where one has been produced. Named on the SLOT so a surface renders what the slot declares rather than a map it keeps of its own — the play surface hardcoded two filenames until v0.7.0, which is a second inventory of the art beside the manifest. Still a candidate: inclusion_reviewed governs whether it may be treated as canonical, and it is false everywhere. */
+      candidate_file?: string | null;
     })[];
     /** Where canon is silent, record it here rather than inventing a default. 'No invented defaults' is the same rule the content baseline applies to clinical and engineering thresholds. */
     unresolved?: {

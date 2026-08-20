@@ -462,6 +462,14 @@
               "type": "string"
             },
             "description": "The operational states this slot must eventually carry — an outage location needs at least two. Declared with the slot so the requirement exists before the art does."
+          },
+          "candidate_file": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "default": null,
+            "description": "The file a candidate currently resolves to, where one has been produced. Named on the SLOT so a surface renders what the slot declares rather than a map it keeps of its own — the play surface hardcoded two filenames until v0.7.0, which is a second inventory of the art beside the manifest. Still a candidate: inclusion_reviewed governs whether it may be treated as canonical, and it is false everywhere."
           }
         },
         "allOf": [
