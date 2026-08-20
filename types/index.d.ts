@@ -301,6 +301,8 @@ export type Option = {
     /** ★ THE REASON the asymmetry is deliberate, not a flag that it is. A boolean records that somebody noticed; a sentence records what they concluded — e.g. 'Canon assigns C1_FRONTLINE_TRUST -1 and names no compensating systemic gain.' An unbalanced option with no explanation is a design defect; with one, it is a design decision. */
     deliberately_asymmetric?: string | null;
     effects: Effect[];
+    /** EVS-4. FPE-05: option risks are available before commitment WHENEVER THE PLAYER'S ROLE COULD REASONABLY KNOW THEM. Until EVS-4 every risk was unconditionally visible, which reads as a briefing rather than as something learned. When this names evidence, the option's `risks` is withheld until the participant holds it — so investigating changes what the decision looks like. ⚠️ NOT EVERY OPTION MAY BE GATED. `protects` is never withheld, and a decision whose every risk is gated shows a participant who inspected nothing a set of options with no trade-offs at all — FPE-03 broken from the other side. The consumer enforces that; a schema cannot see across options. */
+    risk_requires_evidence?: string[];
   };
 
 /** CORRECTION 2 (R3 B3). Effects were `up|down` plus a magnitude, which cannot express canon's enum state — `C1_CRITICAL_PATH = ED_HOLD | REDEPLOY | NETWORK_TRANSFER`. Operations are typed, and an enum operation must name both the variable and the value. */
@@ -401,6 +403,8 @@ export type Scene = {
         role_id: string;
         route: string;
       }[];
+      /** EVS-4. Which evidence discharges this reveal. BY ID: the guarantee that a clue cannot disappear because of role selection is only checkable if the link is a reference rather than a resemblance. */
+      evidence_ids?: string[];
     }[];
     /** CORRECTION 3. The Chapters 1-3 prohibition is enforced by the SCHEMA, not by prose or a grep: a canon-violating scene is unloadable. Canon states 'No formal assessment or transfer artifact is completed in Chapters 1-3.' For ch-01..ch-03, kind MUST be observation_record or none. 'artifact' is not an accepted value anywhere in this draft. */
     real_world_bridge: {
@@ -454,8 +458,8 @@ export type Scene = {
     staging?: {
       /** Arrive and encounter. What the player may see BEFORE they act. `turn` and `residue` are absent from this enum on purpose — that absence is FPE-01. */
       pre_commit: ("orientation" | "desire" | "friction")[];
-      /** Investigate, coordinate, commit. EVS-1 has one member because the build has one player action; EVS-4 adds inspect/compare and consult/coordinate here. Members are not declared before the action they name exists — an enum member nothing can produce is a rule that cannot fire. */
-      interactive: "choice_or_discovery"[];
+      /** Investigate, coordinate, commit. EVS-1 shipped one member and said why: 'members are not declared before the action they name exists — an enum member nothing can produce is a rule that cannot fire.' EVS-4 built the actions, so `actions` joins it here. `actions` stages the scene's inspect and consult controls. `choice_or_discovery` stages the commitment. A scene may present both, and the order in the array is the order they appear — investigation before commitment is the point. */
+      interactive: ("actions" | "choice_or_discovery")[];
       /** The response beat. FPE-02: a commitment receives an immediate causal response BEFORE navigation advances. `contains` makes `immediate_effect` mandatory here, so a scene cannot stage a response beat with nothing in it. */
       post_commit: ("turn" | "immediate_effect")[];
       /** What is left behind. `residue` is the only member, so residue staged anywhere else is refused by this enum and residue staged here is the only accepted form. */
@@ -487,6 +491,55 @@ export type Scene = {
     } | null;
     /** V7. WHERE THE SCENE SITS IN THE DAY, IN THE WORLD’S OWN CLOCK. Canon’s Chapter 1 contract gives the played duration as “First Bell to shortly after the Third Bell”, and each scene setup names its bell. Position told as “Scene 2 of 4” would be true of any content; this is true of this world. ⚠ THIS FIELD SHIPPED IN CONTENT BEFORE IT EXISTED HERE. `citadel` PR #25 added `bell` to all four Chapter 1 scenes; this schema is `additionalProperties: false`, so every one of those scenes was INVALID against the contract it pinned — and nothing found out, because citadel validated no content against the pinned schemas at all. EVS-1 added that validation and it failed on the first run. The gap was the check, not the field. THE ENUM IS CHAPTER 1’S BELLS. Each member has a locale string; a bell with no string renders as its own key at the reader. A chapter naming a fourth bell extends this enum and adds its string in the same change — which is the point of an enum rather than a free string. */
     bell?: "first" | "first_quarter" | "second" | "third" | null;
+    /** EVS-4. WHAT CAN BE LEARNED, AND FROM WHOM. ★ EVIDENCE IS PARTIAL AND IT HAS A SOURCE. Canon's Chapter 1 is built on two people reading accurate information in different rooms and reaching different conclusions — the Hall sees 'backup generation active', the far bay sees no supply. An engine that holds one true world state cannot express that; an engine that holds WHO SAID WHAT can. A scene declares its evidence here and its ACTIONS reveal it. Nothing is discovered by arriving. */
+    evidence?: ({
+      id: string;
+      what: string;
+      /** WHO OR WHAT IS SAYING THIS. Provenance travels with the fact, so a later debrief can ask where a belief came from rather than treating every held fact as equally sound. */
+      source: {
+        kind: "person" | "instrument" | "place" | "record";
+        id: string;
+      };
+      /** Whether this fact is incomplete on its own. Canon: the map is accurate and stops before the chamber; the Hall reading is true and is not the whole truth. `false` marks a fact that stands alone. */
+      partial?: boolean;
+      /** The required_reveal this evidence discharges, if any. WIRED BY ID, NEVER MATCHED ON PROSE — canon guarantees the clue regardless of role, and a guarantee checked by string comparison is not checked. */
+      satisfies_reveal?: string | null;
+      /** The canon passage this was transcribed from. Required, so a reviewer can see what is canon and what is interpretation. */
+      derivedFrom: string;
+    })[] | null;
+    /** EVS-4. WHAT THE PARTICIPANT CAN DO BEFORE COMMITTING. ★ CANON ASKED FOR BOTH OF THESE BY NAME. Inspection: 'place detailed timings in OPTIONAL INSPECTION or the later review rather than long crisis dialogue.' Consultation: 'The selected role supplies one direct authority. The player must SEEK OTHER JUDGMENTS from named clinical, nursing, operational, safety, information, and city partners.' So the two action types are not a mechanic invented for a games checklist; they are how canon says the chapter is played. The third — commit — is `choice_or_discovery`, which already existed. */
+    actions?: ({
+      id: string;
+      /** INSPECT reads a place, instrument or record. CONSULT asks a person, and a person may answer, qualify, refuse or withhold. The distinction is not cosmetic: only a person can decline. */
+      type: "inspect" | "consult";
+      target: {
+        kind: "person" | "instrument" | "place" | "record";
+        id: string;
+      };
+      /** Evidence ids from this scene. An action that reveals nothing is a button, and a button that does nothing teaches that the buttons do nothing. */
+      reveals: string[];
+      /** Which roles may take this action. Null means every role. ⚠️ ROLE FILTERING MUST NOT BREAK THE GUARANTEE: canon states a required clue 'cannot disappear because of role selection', so a reveal must stay reachable through SOME action for every selectable role. That is a cross-document rule and lives in the consumer, not here. */
+      visible_to_roles?: string[] | null;
+      /** Evidence that must already be held for this action to be available. Used sparingly: canon narrates one comparison that genuinely follows from two prior sightings, and manufacturing further chains would be inventing structure. */
+      requires?: string[];
+      /** ★ WHAT THE PERSON DOES, IN THEIR OWN POSITION. ⚠️ `does`, NOT `says`. Canon authors the ACT and not the line: "Fadl classifies the patient-safety event and sets quality follow-up without taking clinical or electrical authority", "Rami defines what may be safely energized", "the nursing leader corrects the interpretation". Those are canon’s own sentences. Turning them into dialogue would be writing the script, which is exactly the invention this project refuses — so the field holds what canon describes, and the dialogue is owed content rather than quietly supplied. `withholds` is the limit canon gives the same person: "the professional owner states the binding limit and acts within existing authority." A consult with no limit is a vending machine with a face on it. */
+      response?: {
+        character_id: string;
+        withholds?: string | null;
+        /** True where canon has the character act under their own authority whether or not the player asked — Rami isolating the board is the shipped case. */
+        acts_independently?: boolean;
+        /** Canon’s own description of what this person does. Transcribed, never composed. */
+        does: string;
+        /** Where the eventual line is owed. Canon describes the act and writes no dialogue for it; saying so keeps the gap visible instead of letting a description pass for a performance. */
+        dialogue_unresolved?: string | null;
+      } | null;
+      /** ⚠️ A DECLARED NOTE, NOT A QUANTITY. Canon names the currencies — 'a cost in time, trust, workload, service capacity, or evidence' — and attaches them to unsafe proposals and the fail-forward. It sets no prices. A number invented here would be a score wearing a lore costume, which DEC-005 exists to prevent, so this is rendered and recorded and never summed. */
+      cost?: {
+        currency: "time" | "trust" | "workload" | "service_capacity" | "evidence";
+        what: string;
+      } | null;
+      derivedFrom: string;
+    })[] | null;
   };
 
 /** Every refusal identifier in the ecosystem. A refusal not in this union does not exist. */

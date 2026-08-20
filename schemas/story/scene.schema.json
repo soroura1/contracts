@@ -245,6 +245,15 @@
               },
               "additionalProperties": false
             }
+          },
+          "evidence_ids": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "pattern": "^ev\\."
+            },
+            "description": "EVS-4. Which evidence discharges this reveal. BY ID: the guarantee that a clue cannot disappear because of role selection is only checkable if the link is a reference rather than a resemblance."
           }
         },
         "additionalProperties": false
@@ -478,12 +487,13 @@
           }
         },
         "interactive": {
-          "description": "Investigate, coordinate, commit. EVS-1 has one member because the build has one player action; EVS-4 adds inspect/compare and consult/coordinate here. Members are not declared before the action they name exists — an enum member nothing can produce is a rule that cannot fire.",
+          "description": "Investigate, coordinate, commit. EVS-1 shipped one member and said why: 'members are not declared before the action they name exists — an enum member nothing can produce is a rule that cannot fire.' EVS-4 built the actions, so `actions` joins it here.\n\n`actions` stages the scene's inspect and consult controls. `choice_or_discovery` stages the commitment. A scene may present both, and the order in the array is the order they appear — investigation before commitment is the point.",
           "type": "array",
           "minItems": 1,
           "uniqueItems": true,
           "items": {
             "enum": [
+              "actions",
               "choice_or_discovery"
             ]
           }
@@ -673,6 +683,236 @@
         null
       ],
       "description": "V7. WHERE THE SCENE SITS IN THE DAY, IN THE WORLD’S OWN CLOCK. Canon’s Chapter 1 contract gives the played duration as “First Bell to shortly after the Third Bell”, and each scene setup names its bell. Position told as “Scene 2 of 4” would be true of any content; this is true of this world.\n\n⚠ THIS FIELD SHIPPED IN CONTENT BEFORE IT EXISTED HERE. `citadel` PR #25 added `bell` to all four Chapter 1 scenes; this schema is `additionalProperties: false`, so every one of those scenes was INVALID against the contract it pinned — and nothing found out, because citadel validated no content against the pinned schemas at all. EVS-1 added that validation and it failed on the first run. The gap was the check, not the field.\n\nTHE ENUM IS CHAPTER 1’S BELLS. Each member has a locale string; a bell with no string renders as its own key at the reader. A chapter naming a fourth bell extends this enum and adds its string in the same change — which is the point of an enum rather than a free string."
+    },
+    "evidence": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "default": null,
+      "description": "EVS-4. WHAT CAN BE LEARNED, AND FROM WHOM.\n\n★ EVIDENCE IS PARTIAL AND IT HAS A SOURCE. Canon's Chapter 1 is built on two people reading accurate information in different rooms and reaching different conclusions — the Hall sees 'backup generation active', the far bay sees no supply. An engine that holds one true world state cannot express that; an engine that holds WHO SAID WHAT can.\n\nA scene declares its evidence here and its ACTIONS reveal it. Nothing is discovered by arriving.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "what",
+          "source",
+          "derivedFrom"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^ev\\."
+          },
+          "what": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "kind",
+              "id"
+            ],
+            "description": "WHO OR WHAT IS SAYING THIS. Provenance travels with the fact, so a later debrief can ask where a belief came from rather than treating every held fact as equally sound.",
+            "properties": {
+              "kind": {
+                "enum": [
+                  "person",
+                  "instrument",
+                  "place",
+                  "record"
+                ]
+              },
+              "id": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          },
+          "partial": {
+            "type": "boolean",
+            "default": true,
+            "description": "Whether this fact is incomplete on its own. Canon: the map is accurate and stops before the chamber; the Hall reading is true and is not the whole truth. `false` marks a fact that stands alone."
+          },
+          "satisfies_reveal": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "default": null,
+            "description": "The required_reveal this evidence discharges, if any. WIRED BY ID, NEVER MATCHED ON PROSE — canon guarantees the clue regardless of role, and a guarantee checked by string comparison is not checked."
+          },
+          "derivedFrom": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The canon passage this was transcribed from. Required, so a reviewer can see what is canon and what is interpretation."
+          }
+        }
+      }
+    },
+    "actions": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "default": null,
+      "description": "EVS-4. WHAT THE PARTICIPANT CAN DO BEFORE COMMITTING.\n\n★ CANON ASKED FOR BOTH OF THESE BY NAME.\n\nInspection: 'place detailed timings in OPTIONAL INSPECTION or the later review rather than long crisis dialogue.'\n\nConsultation: 'The selected role supplies one direct authority. The player must SEEK OTHER JUDGMENTS from named clinical, nursing, operational, safety, information, and city partners.'\n\nSo the two action types are not a mechanic invented for a games checklist; they are how canon says the chapter is played. The third — commit — is `choice_or_discovery`, which already existed.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "type",
+          "target",
+          "reveals",
+          "derivedFrom"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "type": {
+            "enum": [
+              "inspect",
+              "consult"
+            ],
+            "description": "INSPECT reads a place, instrument or record. CONSULT asks a person, and a person may answer, qualify, refuse or withhold. The distinction is not cosmetic: only a person can decline."
+          },
+          "target": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "kind",
+              "id"
+            ],
+            "properties": {
+              "kind": {
+                "enum": [
+                  "person",
+                  "instrument",
+                  "place",
+                  "record"
+                ]
+              },
+              "id": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          },
+          "reveals": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "pattern": "^ev\\."
+            },
+            "description": "Evidence ids from this scene. An action that reveals nothing is a button, and a button that does nothing teaches that the buttons do nothing."
+          },
+          "visible_to_roles": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "default": null,
+            "items": {
+              "type": "string"
+            },
+            "description": "Which roles may take this action. Null means every role. ⚠️ ROLE FILTERING MUST NOT BREAK THE GUARANTEE: canon states a required clue 'cannot disappear because of role selection', so a reveal must stay reachable through SOME action for every selectable role. That is a cross-document rule and lives in the consumer, not here."
+          },
+          "requires": {
+            "type": "array",
+            "default": [],
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "pattern": "^ev\\."
+            },
+            "description": "Evidence that must already be held for this action to be available. Used sparingly: canon narrates one comparison that genuinely follows from two prior sightings, and manufacturing further chains would be inventing structure."
+          },
+          "response": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "default": null,
+            "additionalProperties": false,
+            "required": [
+              "character_id",
+              "does"
+            ],
+            "description": "★ WHAT THE PERSON DOES, IN THEIR OWN POSITION.\n\n⚠️ `does`, NOT `says`. Canon authors the ACT and not the line: \"Fadl classifies the patient-safety event and sets quality follow-up without taking clinical or electrical authority\", \"Rami defines what may be safely energized\", \"the nursing leader corrects the interpretation\". Those are canon’s own sentences. Turning them into dialogue would be writing the script, which is exactly the invention this project refuses — so the field holds what canon describes, and the dialogue is owed content rather than quietly supplied.\n\n`withholds` is the limit canon gives the same person: \"the professional owner states the binding limit and acts within existing authority.\" A consult with no limit is a vending machine with a face on it.",
+            "properties": {
+              "character_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "withholds": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "default": null
+              },
+              "acts_independently": {
+                "type": "boolean",
+                "default": false,
+                "description": "True where canon has the character act under their own authority whether or not the player asked — Rami isolating the board is the shipped case."
+              },
+              "does": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Canon’s own description of what this person does. Transcribed, never composed."
+              },
+              "dialogue_unresolved": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "default": null,
+                "description": "Where the eventual line is owed. Canon describes the act and writes no dialogue for it; saying so keeps the gap visible instead of letting a description pass for a performance."
+              }
+            }
+          },
+          "cost": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "default": null,
+            "additionalProperties": false,
+            "required": [
+              "currency",
+              "what"
+            ],
+            "description": "⚠️ A DECLARED NOTE, NOT A QUANTITY. Canon names the currencies — 'a cost in time, trust, workload, service capacity, or evidence' — and attaches them to unsafe proposals and the fail-forward. It sets no prices. A number invented here would be a score wearing a lore costume, which DEC-005 exists to prevent, so this is rendered and recorded and never summed.",
+            "properties": {
+              "currency": {
+                "enum": [
+                  "time",
+                  "trust",
+                  "workload",
+                  "service_capacity",
+                  "evidence"
+                ]
+              },
+              "what": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          },
+          "derivedFrom": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
     }
   },
   "$defs": {

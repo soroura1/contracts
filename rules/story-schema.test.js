@@ -327,3 +327,161 @@ test('a scene need not sit on a bell — the field is optional and nullable', ()
   s.bell = null;
   assert.ok(validateScene(s), 'null');
 });
+
+// --- EVS-4: actions, evidence and role-filtered discovery ------------------------
+//
+// ★ THE TWO ACTION TYPES ARE CANON'S, NOT A GAMES CHECKLIST'S.
+//
+//   "place detailed timings in OPTIONAL INSPECTION or the later review rather
+//    than long crisis dialogue"
+//   "The selected role supplies one direct authority. The player must SEEK
+//    OTHER JUDGMENTS from named clinical, nursing, operational, safety,
+//    information, and city partners."
+//
+// So `inspect` and `consult` are transcribed, not designed. The third action —
+// commit — already existed as `choice_or_discovery`.
+
+const evidence = () => ({
+  id: 'ev.01.board-reading', what: 'The Hall reads generation active.',
+  source: { kind: 'instrument', id: 'the Measure' }, partial: true,
+  derivedFrom: 'Canon Scene 2: "The Hall initially sees backup generation active, not the downstream exception."',
+});
+const action = () => ({
+  id: 'consult.01.rami', type: 'consult', target: { kind: 'person', id: 'Rami' },
+  reveals: ['ev.01.board-reading'],
+  derivedFrom: 'Canon: "Rami defines what may be safely energized."',
+});
+
+test('★ EVS-4 — a scene may carry evidence and the actions that reveal it', () => {
+  const s = staged();
+  s.staging.interactive = ['actions', 'choice_or_discovery'];
+  s.evidence = [evidence()];
+  s.actions = [action()];
+  assert.ok(validateScene(s), JSON.stringify(validateScene.errors));
+});
+
+test('★ EVS-4 — the interactive phase can stage actions, and EVS-1 predicted it', () => {
+  // EVS-1 shipped `interactive: ["choice_or_discovery"]` and said why: an enum
+  // member nothing can produce is a rule that cannot fire. The action exists now.
+  const s = staged();
+  s.staging.interactive = ['actions'];
+  s.evidence = [evidence()];
+  s.actions = [action()];
+  assert.ok(validateScene(s), JSON.stringify(validateScene.errors));
+
+  s.staging.interactive = ['actions', 'turn'];
+  assert.equal(validateScene(s), false, 'the turn is post-commitment and cannot be staged as an action');
+});
+
+test('★ an action that reveals NOTHING is refused — a button that does nothing', () => {
+  const s = staged();
+  s.evidence = [evidence()];
+  s.actions = [{ ...action(), reveals: [] }];
+  assert.equal(validateScene(s), false);
+
+  s.actions = [action()];
+  assert.ok(validateScene(s), JSON.stringify(validateScene.errors));
+});
+
+test('★ evidence must name its SOURCE — provenance travels with the fact', () => {
+  // Canon's chapter turns on two people reading accurate information in
+  // different rooms. An engine holding one true world state cannot express
+  // that; one holding who-said-what can.
+  const s = staged();
+  const e = evidence();
+  delete e.source;
+  s.evidence = [e];
+  s.actions = [action()];
+  assert.equal(validateScene(s), false, 'a fact with no source is a fact from nowhere');
+});
+
+test('★ every action and every piece of evidence must cite CANON', () => {
+  const s = staged();
+  s.evidence = [evidence()];
+  const a = action();
+  delete a.derivedFrom;
+  s.actions = [a];
+  assert.equal(validateScene(s), false, 'an uncited action is invented content');
+
+  s.actions = [action()];
+  const e = evidence();
+  delete e.derivedFrom;
+  s.evidence = [e];
+  assert.equal(validateScene(s), false, 'uncited evidence is invented content');
+});
+
+test('★ a consult carries what the person DOES, and the LIMIT canon gives them', () => {
+  // ⚠️ `does`, NOT `says`. Canon authors the act and not the line: "Fadl
+  // classifies the patient-safety event and sets quality follow-up WITHOUT
+  // TAKING CLINICAL OR ELECTRICAL AUTHORITY." Turning that into dialogue would
+  // be writing the script.
+  const s = staged();
+  s.evidence = [evidence()];
+  s.actions = [{
+    ...action(),
+    response: {
+      character_id: 'Fadl',
+      does: 'Classifies the patient-safety event and sets quality follow-up.',
+      withholds: 'He does not take clinical or electrical authority.',
+      acts_independently: false,
+      dialogue_unresolved: 'Canon describes the act and writes no line for it.',
+    },
+  }];
+  assert.ok(validateScene(s), JSON.stringify(validateScene.errors));
+
+  s.actions[0].response = { character_id: 'Fadl', does: 'x', says: 'a line nobody wrote' };
+  assert.equal(validateScene(s), false, 'dialogue must not be expressible where canon writes none');
+
+  s.actions[0].response = { character_id: 'Fadl' };
+  assert.equal(validateScene(s), false, 'a character who responds must do something');
+});
+
+test('★ a cost is a DECLARED NOTE in a named currency — never a quantity', () => {
+  // Canon names the currencies — "a cost in time, trust, workload, service
+  // capacity, or evidence" — and sets no prices. A number invented here would
+  // be a score wearing a lore costume.
+  const s = staged();
+  s.evidence = [evidence()];
+  s.actions = [{ ...action(), cost: { currency: 'time', what: 'The next status update slips.' } }];
+  assert.ok(validateScene(s), JSON.stringify(validateScene.errors));
+
+  s.actions[0].cost = { currency: 'time', what: 'slips', amount: 3 };
+  assert.equal(validateScene(s), false, 'a quantity must not be expressible');
+
+  s.actions[0].cost = { currency: 'morale', what: 'x' };
+  assert.equal(validateScene(s), false, 'a currency canon did not name is refused');
+});
+
+test('★ a reveal is wired to evidence BY ID, never matched on prose', () => {
+  // Canon guarantees the clue regardless of role. A guarantee checked by string
+  // comparison is not checked.
+  const s = staged();
+  s.evidence = [{ ...evidence(), satisfies_reveal: 'reveal.01.capacity-is-not-physical-position' }];
+  s.actions = [action()];
+  s.required_reveals[0].evidence_ids = ['ev.01.board-reading'];
+  assert.ok(validateScene(s), JSON.stringify(validateScene.errors));
+
+  s.required_reveals[0].evidence_ids = ['not-an-evidence-id'];
+  assert.equal(validateScene(s), false, 'a reveal may only point at evidence ids');
+});
+
+test('★ FPE-05 — an option may withhold its risk until the evidence is held', () => {
+  const d = decision();
+  d.options[0].risk_requires_evidence = ['ev.01.board-reading'];
+  assert.ok(validateDecision(d), JSON.stringify(validateDecision.errors));
+
+  // `protects` is never gated. An option whose protection is hidden is not a
+  // position the participant can weigh at all, so no such field exists.
+  const optionSchema = load('decision.schema.json').$defs.option;
+  assert.ok('risk_requires_evidence' in optionSchema.properties);
+  assert.ok(!('protects_requires_evidence' in optionSchema.properties),
+    'protects must never be withheld — an option must always be weighable');
+
+  d.options[0].risk_requires_evidence = ['board-reading'];
+  assert.equal(validateDecision(d), false, 'the gate may only name evidence ids');
+});
+
+test('EVS-4 is ADDITIVE — a scene with no actions still validates', () => {
+  assert.ok(validateScene(staged()), JSON.stringify(validateScene.errors));
+  assert.ok(validateScene(scene()));
+});

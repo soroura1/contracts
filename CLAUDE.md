@@ -1,6 +1,6 @@
 # `contracts` — status
 
-**Last updated:** 2026-08-20 · **Latest tag:** `v0.5.1`
+**Last updated:** 2026-08-20 · **Latest tag:** `v0.6.0`
 **Topology:** [`../CLAUDE.md`](../CLAUDE.md) — read before proposing any port, path or hostname.
 
 ## ★ The scene contract now says WHEN, not only WHAT — `v0.5.0`, EVS-1

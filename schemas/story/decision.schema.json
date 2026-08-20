@@ -127,6 +127,16 @@
           "items": {
             "$ref": "#/$defs/effect"
           }
+        },
+        "risk_requires_evidence": {
+          "type": "array",
+          "default": [],
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^ev\\."
+          },
+          "description": "EVS-4. FPE-05: option risks are available before commitment WHENEVER THE PLAYER'S ROLE COULD REASONABLY KNOW THEM. Until EVS-4 every risk was unconditionally visible, which reads as a briefing rather than as something learned.\n\nWhen this names evidence, the option's `risks` is withheld until the participant holds it — so investigating changes what the decision looks like.\n\n⚠️ NOT EVERY OPTION MAY BE GATED. `protects` is never withheld, and a decision whose every risk is gated shows a participant who inspected nothing a set of options with no trade-offs at all — FPE-03 broken from the other side. The consumer enforces that; a schema cannot see across options."
         }
       }
     },
