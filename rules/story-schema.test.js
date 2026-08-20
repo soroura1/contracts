@@ -295,3 +295,35 @@ test('the phase SEQUENCE is fixed by the contract, so a scene cannot reorder it'
   s.staging.after_everything = ['residue'];
   assert.equal(validateScene(s), false, 'a fifth phase is not a phase this contract knows');
 });
+
+// --- V7: the bell ---------------------------------------------------------------
+
+test('★ V7 — the bell validates, and it did NOT before v0.5.1', () => {
+  // ⚠️ HOW THIS WAS FOUND. `citadel` PR #25 added `bell` to all four Chapter 1
+  // scenes. This schema is `additionalProperties: false`, so every one of those
+  // scenes has been INVALID against the contract it pins ever since — and
+  // nothing found out, because citadel validated no content against the pinned
+  // schemas at all. EVS-1 added that validation and it failed on its first run.
+  //
+  // The defect was not the field. It was that a consumer pinned a schema and
+  // never ran it.
+  const s = scene();
+  s.bell = 'first';
+  assert.ok(validateScene(s), JSON.stringify(validateScene.errors));
+});
+
+test('★ V7 — a bell with no locale string is refused', () => {
+  // Every enum member has a string in en.json. A free-form bell would render as
+  // its own key at the reader, which is the failure the locale coverage check
+  // exists to catch one repository over.
+  const s = scene();
+  s.bell = 'fourth';
+  assert.equal(validateScene(s), false, 'a bell canon has not named must not validate');
+});
+
+test('a scene need not sit on a bell — the field is optional and nullable', () => {
+  const s = scene();
+  assert.ok(validateScene(s), 'absent');
+  s.bell = null;
+  assert.ok(validateScene(s), 'null');
+});
