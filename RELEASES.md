@@ -15,6 +15,31 @@ numbers, because no single file owned the sequence.
    who did not build it.
 3. Cutting a tag does not deploy it. See [CONTRIBUTING.md](CONTRIBUTING.md) § *The deploy gate*.
 
+## v0.5.1 — `bell` on a scene · V7, and the check that found it missing
+
+**20 August 2026.**
+
+`citadel` PR #25 added `bell` to all four Chapter 1 scenes — the world's own clock, so a scene's
+place in the day is told as *"Quarter after First Bell"* rather than *"Scene 2 of 4"*. It was never
+added here, and `scene.schema.json` is `additionalProperties: false`.
+
+> **So every shipped Chapter 1 scene has been invalid against the contract it pins, since PR #25.**
+
+**Nothing found out, and nothing could have.** `citadel` validated *no content* against the pinned
+schemas at all: `check-repo.sh` proved the pin was an exact tag, and `npm run conformance` ran this
+repository's suite against itself. Neither looked at a scene. EVS-1 added
+`citadel/test/content-conformance.test.js` and it failed on its first run.
+
+⚠️ **The defect was the missing check, not the missing field.** A consumer that pins a contract and
+never runs it has paid the tag-and-pin cost and bought none of the safety — which is the entire
+argument for five repositories.
+
+`bell` is an optional, nullable enum of the four bells Chapter 1 names. An enum rather than a free
+string because **every member has a locale string**; a bell with none renders as its own key at the
+reader. A chapter naming a fourth bell extends the enum and adds its string in the same change.
+
+Additive. Consumers on `v0.5.0` are unaffected until they adopt it.
+
 ## v0.5.0 — the staged runtime contract · EVS-1
 
 **20 August 2026.** `DEC-030`. The Experience Vertical-Slice Gate's first development session.
