@@ -144,3 +144,148 @@ test('V9 — a scene may declare its register UNRESOLVED rather than invent one'
                         unresolved: 'canon names no register for this scene individually' };
   assert.ok(validateScene(s));
 });
+
+// --- EVS-1: staged runtime presentation ---------------------------------------
+//
+// ★ WHAT THESE TESTS PROTECT.
+//
+// The Final Product Experience Contract's first presentation invariant (FPE-01)
+// is that `turn`, the immediate effect, the state delta and `residue` are not
+// rendered before commitment. The current renderer emits all six movements as
+// one ordered document, so the interface spoils its own drama — and until this
+// version there was NOTHING IN THE CONTRACT FOR A RUNTIME TO OBEY. A rule with
+// no field to key on is the failure shape this repository has already met
+// several times: correct, and unable to fire.
+//
+// So each refusal below is paired with the corrected form being permitted.
+
+const staging = () => {
+  const { _comment, ...fragment } =
+    JSON.parse(readFileSync(join(here, 'fixtures/scene-staging.json'), 'utf8'));
+  return fragment;
+};
+const staged = () => ({ ...scene(), ...staging() });
+
+test('the staged fixture passes — without this, every EVS-1 refusal below is meaningless', () => {
+  assert.ok(validateScene(staged()), JSON.stringify(validateScene.errors));
+});
+
+test('staging is ADDITIVE — an unstaged scene still validates, so v0.4.x content is untouched', () => {
+  // The scene fixture and the four R3 candidates carry no staging. If this
+  // failed, v0.5.0 would be a major version pretending to be a minor one.
+  assert.ok(validateScene(scene()), JSON.stringify(validateScene.errors));
+});
+
+test('★ FPE-01 — `residue` staged anywhere but scene_exit is REFUSED', () => {
+  const s = staged();
+  s.staging.pre_commit = ['orientation', 'desire', 'friction', 'residue'];
+  assert.equal(validateScene(s), false, 'residue before commitment must not validate');
+
+  s.staging.pre_commit = ['orientation', 'desire', 'friction'];
+  assert.ok(validateScene(s), JSON.stringify(validateScene.errors));
+});
+
+test('★ FPE-01 — `turn` staged before commitment is REFUSED', () => {
+  const s = staged();
+  s.staging.pre_commit = ['orientation', 'turn'];
+  assert.equal(validateScene(s), false, 'the turn is what the commitment CAUSES');
+
+  s.staging.post_commit = ['turn', 'immediate_effect'];
+  s.staging.pre_commit = ['orientation'];
+  assert.ok(validateScene(s), JSON.stringify(validateScene.errors));
+});
+
+test('★ the all-at-once presentation — six movements in one phase — is UNREPRESENTABLE', () => {
+  // This is the shape the build ships today: one <ol> of all six movements.
+  const s = staged();
+  s.staging.pre_commit = ['orientation', 'desire', 'friction', 'choice_or_discovery', 'turn', 'residue'];
+  assert.equal(validateScene(s), false, 'the current renderer\'s shape must not be expressible');
+});
+
+test('★ FPE-02 — a post-commit phase with no immediate effect in it is REFUSED', () => {
+  const s = staged();
+  s.staging.post_commit = ['turn'];
+  assert.equal(validateScene(s), false, 'a response beat must contain the response');
+
+  s.staging.post_commit = ['immediate_effect'];
+  assert.ok(validateScene(s), 'the turn is optional there; the immediate effect is not');
+});
+
+test('★ a scene that STAGES but carries no immediate_effect is REFUSED', () => {
+  // The staging can name the beat while the scene holds nothing to put in it.
+  // That renders as an empty phase, which a player reads as a choice that did
+  // nothing -- the exact failure FPE-02 names.
+  const s = staged();
+  delete s.immediate_effect;
+  assert.equal(validateScene(s), false, 'a staged scene owes its immediate effect');
+
+  s.immediate_effect = staging().immediate_effect;
+  assert.ok(validateScene(s), JSON.stringify(validateScene.errors));
+});
+
+test('an UNSTAGED scene owes no immediate effect — the conditional keys on staging, not on nothing', () => {
+  const s = scene();
+  assert.ok(!('staging' in s));
+  assert.ok(validateScene(s), 'the then-branch must not fire when staging is absent');
+  s.staging = null;
+  assert.ok(validateScene(s), 'nor when staging is explicitly null');
+});
+
+test('★ a null narrative response must say WHAT IS OWED and what to derive the beat from', () => {
+  // "Canon authors no prose here" and "nobody wrote the response beat" produce
+  // the same document unless the gap is declared. Refusing the undeclared form
+  // is what keeps `unresolved` an honest record instead of an optional habit.
+  const s = staged();
+  const r = s.immediate_effect.responses[0];
+
+  delete r.unresolved;
+  assert.equal(validateScene(s), false, 'a null response with no declared gap must be refused');
+
+  r.unresolved = [{ field: 'narrative_response', why: 'canon authors none' }];
+  delete r.derived_from;
+  assert.equal(validateScene(s), false, 'a null response with nothing to derive from is an empty beat');
+
+  r.derived_from = ['protects', 'risks'];
+  assert.ok(validateScene(s), JSON.stringify(validateScene.errors));
+});
+
+test('an AUTHORED narrative response needs no unresolved entry — the rule keys on the gap', () => {
+  const s = staged();
+  const r = s.immediate_effect.responses[0];
+  r.narrative_response = { key: 'scene.01.01.response.name_an_owner' };
+  delete r.unresolved;
+  delete r.derived_from;
+  assert.ok(validateScene(s), JSON.stringify(validateScene.errors));
+});
+
+test('★ a character response is expressible — canon authors three of them for the closure', () => {
+  // Chapter 1 Scene 4 assigns Fadl, Maha and Rami a different action per
+  // pathway. If this shape only ever held null, the field would be decoration.
+  const s = staged();
+  s.immediate_effect.responses[0].character_response = {
+    character_id: 'Fadl',
+    responds: 'Retains the high-risk near-miss classification and names an owner and review time.',
+  };
+  assert.ok(validateScene(s), JSON.stringify(validateScene.errors));
+
+  s.immediate_effect.responses[0].character_response = { character_id: 'Fadl' };
+  assert.equal(validateScene(s), false, 'a character who reacts must react with something');
+});
+
+test('the state change is NOT restated in the scene — it has one authority', () => {
+  const s = staged();
+  assert.equal(s.immediate_effect.state_change_source, 'decision_effects');
+  s.immediate_effect.state_change_source = 'authored_here';
+  assert.equal(validateScene(s), false,
+    'a second place to declare state changes is a second definition that will drift');
+});
+
+test('the phase SEQUENCE is fixed by the contract, so a scene cannot reorder it', () => {
+  const s = staged();
+  delete s.staging.scene_exit;
+  assert.equal(validateScene(s), false, 'all four phases are required');
+
+  s.staging.scene_exit = ['residue'];
+  s.staging.after_everything = ['residue'];
+  assert.equal(validateScene(s), false, 'a fifth phase is not a phase this contract knows');
+});

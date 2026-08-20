@@ -1,0 +1,36 @@
+{
+  "_comment": "EVS-1. The staging fragment, merged onto scene-valid.json by story-schema.test.js rather than shipped as a second full scene. A staged COPY of a 100-line fixture is a second definition of the same scene, and two definitions of one thing drift — the defect this repository's type generation exists to prevent, one layer down.",
+
+  "staging": {
+    "pre_commit": ["orientation", "desire", "friction"],
+    "interactive": ["choice_or_discovery"],
+    "post_commit": ["turn", "immediate_effect"],
+    "scene_exit": ["residue"]
+  },
+
+  "immediate_effect": {
+    "state_change_source": "decision_effects",
+    "responses": [
+      {
+        "option_id": "dec-01-gate-access.name-an-owner",
+        "narrative_response": null,
+        "character_response": null,
+        "derived_from": ["protects", "risks", "effects"],
+        "unresolved": [
+          { "field": "narrative_response", "why": "Canon tabulates this pathway's state effect and no post-commitment narration." },
+          { "field": "character_response", "why": "Canon names no character reaction to this pathway." }
+        ]
+      },
+      {
+        "option_id": "dec-01-gate-access.help-personally",
+        "narrative_response": null,
+        "character_response": null,
+        "derived_from": ["protects", "risks"],
+        "unresolved": [
+          { "field": "narrative_response", "why": "Canon gives 'immediate success; no systemic state gain' and no narration." },
+          { "field": "character_response", "why": "Canon names no character reaction to this pathway." }
+        ]
+      }
+    ]
+  }
+}
