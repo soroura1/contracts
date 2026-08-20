@@ -844,15 +844,11 @@
             "additionalProperties": false,
             "required": [
               "character_id",
-              "says"
+              "does"
             ],
-            "description": "★ WHAT THE PERSON DOES, IN THEIR OWN POSITION. Canon's fail-forward is explicit: 'the professional owner states the binding limit and acts within existing authority.' `withholds` is that limit — what this person will NOT do, even when asked. A consult with no limit is a vending machine with a face on it.",
+            "description": "★ WHAT THE PERSON DOES, IN THEIR OWN POSITION.\n\n⚠️ `does`, NOT `says`. Canon authors the ACT and not the line: \"Fadl classifies the patient-safety event and sets quality follow-up without taking clinical or electrical authority\", \"Rami defines what may be safely energized\", \"the nursing leader corrects the interpretation\". Those are canon’s own sentences. Turning them into dialogue would be writing the script, which is exactly the invention this project refuses — so the field holds what canon describes, and the dialogue is owed content rather than quietly supplied.\n\n`withholds` is the limit canon gives the same person: \"the professional owner states the binding limit and acts within existing authority.\" A consult with no limit is a vending machine with a face on it.",
             "properties": {
               "character_id": {
-                "type": "string",
-                "minLength": 1
-              },
-              "says": {
                 "type": "string",
                 "minLength": 1
               },
@@ -867,6 +863,19 @@
                 "type": "boolean",
                 "default": false,
                 "description": "True where canon has the character act under their own authority whether or not the player asked — Rami isolating the board is the shipped case."
+              },
+              "does": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Canon’s own description of what this person does. Transcribed, never composed."
+              },
+              "dialogue_unresolved": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "default": null,
+                "description": "Where the eventual line is owed. Canon describes the act and writes no dialogue for it; saying so keeps the gap visible instead of letting a description pass for a performance."
               }
             }
           },

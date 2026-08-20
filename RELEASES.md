@@ -38,6 +38,13 @@ nothing can produce is a rule that cannot fire."*
 |---|---|
 | `evidence` | What can be learned, each item carrying **its source** and whether it is `partial` |
 | `actions` | `inspect` or `consult`, a target, what it `reveals`, `visible_to_roles`, an optional `requires`, an optional character `response`, an optional `cost` |
+
+⚠️ **A consult response carries `does`, not `says`.** Canon authors the **act** and not the line —
+*"Fadl classifies the patient-safety event and sets quality follow-up **without taking clinical or
+electrical authority**"*, *"Rami defines what may be safely energized"*, *"the nursing leader corrects
+the interpretation"*. Those are canon's own sentences. Turning them into dialogue would be writing
+the script, so `says` is **unrepresentable** and `dialogue_unresolved` records that the line is owed.
+
 | `required_reveals[].evidence_ids` | The reveal wired to evidence **by id** |
 
 ### Why evidence carries a source

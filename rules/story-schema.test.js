@@ -410,25 +410,30 @@ test('★ every action and every piece of evidence must cite CANON', () => {
   assert.equal(validateScene(s), false, 'uncited evidence is invented content');
 });
 
-test('★ a consult may carry a LIMIT — what the person will not do', () => {
-  // Canon's fail-forward: "the professional owner states the binding limit and
-  // acts within existing authority." A consult with no limit is a vending
-  // machine with a face on it.
+test('★ a consult carries what the person DOES, and the LIMIT canon gives them', () => {
+  // ⚠️ `does`, NOT `says`. Canon authors the act and not the line: "Fadl
+  // classifies the patient-safety event and sets quality follow-up WITHOUT
+  // TAKING CLINICAL OR ELECTRICAL AUTHORITY." Turning that into dialogue would
+  // be writing the script.
   const s = staged();
   s.evidence = [evidence()];
   s.actions = [{
     ...action(),
     response: {
       character_id: 'Fadl',
-      says: 'This is a high-risk near miss and it will be recorded as one.',
+      does: 'Classifies the patient-safety event and sets quality follow-up.',
       withholds: 'He does not take clinical or electrical authority.',
       acts_independently: false,
+      dialogue_unresolved: 'Canon describes the act and writes no line for it.',
     },
   }];
   assert.ok(validateScene(s), JSON.stringify(validateScene.errors));
 
+  s.actions[0].response = { character_id: 'Fadl', does: 'x', says: 'a line nobody wrote' };
+  assert.equal(validateScene(s), false, 'dialogue must not be expressible where canon writes none');
+
   s.actions[0].response = { character_id: 'Fadl' };
-  assert.equal(validateScene(s), false, 'a character who responds must say something');
+  assert.equal(validateScene(s), false, 'a character who responds must do something');
 });
 
 test('★ a cost is a DECLARED NOTE in a named currency — never a quantity', () => {

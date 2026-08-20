@@ -522,13 +522,16 @@ export type Scene = {
       visible_to_roles?: string[] | null;
       /** Evidence that must already be held for this action to be available. Used sparingly: canon narrates one comparison that genuinely follows from two prior sightings, and manufacturing further chains would be inventing structure. */
       requires?: string[];
-      /** ★ WHAT THE PERSON DOES, IN THEIR OWN POSITION. Canon's fail-forward is explicit: 'the professional owner states the binding limit and acts within existing authority.' `withholds` is that limit — what this person will NOT do, even when asked. A consult with no limit is a vending machine with a face on it. */
+      /** ★ WHAT THE PERSON DOES, IN THEIR OWN POSITION. ⚠️ `does`, NOT `says`. Canon authors the ACT and not the line: "Fadl classifies the patient-safety event and sets quality follow-up without taking clinical or electrical authority", "Rami defines what may be safely energized", "the nursing leader corrects the interpretation". Those are canon’s own sentences. Turning them into dialogue would be writing the script, which is exactly the invention this project refuses — so the field holds what canon describes, and the dialogue is owed content rather than quietly supplied. `withholds` is the limit canon gives the same person: "the professional owner states the binding limit and acts within existing authority." A consult with no limit is a vending machine with a face on it. */
       response?: {
         character_id: string;
-        says: string;
         withholds?: string | null;
         /** True where canon has the character act under their own authority whether or not the player asked — Rami isolating the board is the shipped case. */
         acts_independently?: boolean;
+        /** Canon’s own description of what this person does. Transcribed, never composed. */
+        does: string;
+        /** Where the eventual line is owed. Canon describes the act and writes no dialogue for it; saying so keeps the gap visible instead of letting a description pass for a performance. */
+        dialogue_unresolved?: string | null;
       } | null;
       /** ⚠️ A DECLARED NOTE, NOT A QUANTITY. Canon names the currencies — 'a cost in time, trust, workload, service capacity, or evidence' — and attaches them to unsafe proposals and the fail-forward. It sets no prices. A number invented here would be a score wearing a lore costume, which DEC-005 exists to prevent, so this is rendered and recorded and never summed. */
       cost?: {
