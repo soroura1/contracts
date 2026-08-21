@@ -1,7 +1,33 @@
 # `contracts` — status
 
-**Last updated:** 2026-08-20 · **Latest tag:** `v0.7.0`
+**Last updated:** 2026-08-21 · **Latest tag:** `v0.8.0`
 **Topology:** [`../CLAUDE.md`](../CLAUDE.md) — read before proposing any port, path or hostname.
+
+## ★ SG-1 `v0.8.0` — an option can now COST something, and an instrument can be silent
+
+`DEC-031`. Additive; every `v0.7.x` scene and decision still validates, and a test asserts it.
+
+| New | What it makes expressible |
+|---|---|
+| `option.commits` | A named capability moving to `committed` or `consumed`. **No amount, no remaining, no count** — refused by the schema and tested |
+| `option.transfers_pressure_to` | Where the pressure went. Chapter 1 never removes pressure; it moves it |
+| `option.residue` | What is still true afterwards, **per pathway**, each entry binding to a location, route, instrument, person or capability |
+| `evidence[].reading` | An instrument reading with a state — `known`, `uncertain`, `conflicting`, `unavailable`, `changed` — and a chronology **mark**, never a timestamp |
+| `capability.schema.json` | A capability as a **named holder in a named state**, whose `how_known` must name an instrument |
+| `instrument.schema.json` | The physical object, what it may be compared with, and ⛔ **what it must never imply** — required and non-empty |
+| `scene.character_beats` | Speech, action, refusal, qualification and **independent action**, which is canon's fail-forward rule with a trigger |
+| `world_response` | Environment → instrument → holder → person. All four keys required, each nullable |
+
+> ★ **`unavailable` is a state, not an error, and that distinction is the chapter.** The Measure's
+> weight room holds one weight per **declared** dependency and *"shows nothing at all when a
+> dependency was never declared."* Chapter 1's hidden board was never declared, so the instrument
+> that would have caught it is accurate and silent. An engine that models silence as failure cannot
+> express it.
+
+> ⚠️ **A residue that binds to nothing was the real defect.** `scene.residue` is one sentence, so
+> three pathways with three different aftermaths shared one description of what was left behind —
+> the same shape as three options sharing one consequence, and why the world did not appear to
+> answer. `binds_to` is what lets a consequence survive a return to the hub and a resume.
 
 ## ★ The scene contract now says WHEN, not only WHAT — `v0.5.0`, EVS-1
 

@@ -1,0 +1,12 @@
+{
+  "id": "cap.staff-attention",
+  "name_key": "capability.staff_attention.name",
+  "held_by": { "kind": "person", "id": "Nour" },
+  "available_state": "The roster safely covers about 28 while 30 beds are occupied, and hand ventilation is safe only while competent people can sustain it and monitor the patient.",
+  "how_known": "inst.staffing-board",
+  "consumed_by": ["sustaining manual fallback in the far bay", "escorting a movement"],
+  "opens": ["local stabilization for as long as it is needed"],
+  "closes": ["covering the other thirty ICU beds and the emergency department at the same time"],
+  "residue": "One emergency resuscitation table remains unavailable after power returns because its staff are still supporting ICU recovery.",
+  "derivedFrom": "Canon, chapter-01-the-shadow-at-first-light-v0.2.md: the duty nursing leader's want, the ICU fixed operating facts, and response approach A."
+}

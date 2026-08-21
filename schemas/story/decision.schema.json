@@ -137,6 +137,102 @@
             "pattern": "^ev\\."
           },
           "description": "EVS-4. FPE-05: option risks are available before commitment WHENEVER THE PLAYER'S ROLE COULD REASONABLY KNOW THEM. Until EVS-4 every risk was unconditionally visible, which reads as a briefing rather than as something learned.\n\nWhen this names evidence, the option's `risks` is withheld until the participant holds it — so investigating changes what the decision looks like.\n\n⚠️ NOT EVERY OPTION MAY BE GATED. `protects` is never withheld, and a decision whose every risk is gated shows a participant who inspected nothing a set of options with no trade-offs at all — FPE-03 broken from the other side. The consumer enforces that; a schema cannot see across options."
+        },
+        "commits": {
+          "type": "array",
+          "default": [],
+          "description": "SG-1 C1/C3. WHAT THIS OPTION COMMITS, AND TO WHAT.\n\n★ THIS IS WHERE AN OPTION STOPS BEING A SENTENCE AND STARTS BEING A STRATEGY. Before SG-1 every option was free: a participant who took every action and then chose was strictly better off than one who chose, so there was no choosing. An option commits named holders — hands, a set, a route, an engineer's presence, a copyist's attention — and a holder who is committed is somewhere, doing something, and is therefore not available for the other thing.\n\n⛔ THERE IS NO AMOUNT HERE, AND ADDING ONE IS A CHANGE TO WHAT THE PRODUCT IS. Canon names time, trust, workload, service capacity and evidence and sets no prices. A quantity invites optimisation; exclusivity does not, and exclusivity survives the removal of every clock, which is what keeps the non-timed accessibility path carrying the same trade rather than a relaxed one.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "capability",
+              "becomes",
+              "derivedFrom"
+            ],
+            "properties": {
+              "capability": {
+                "type": "string",
+                "pattern": "^cap\\.",
+                "description": "The capability committed. Its shape is capability.schema.json, and its holder is declared there rather than repeated here."
+              },
+              "becomes": {
+                "enum": [
+                  "committed",
+                  "consumed"
+                ],
+                "description": "`committed` — the holder is doing this now and can be released later. `consumed` — it is gone for this chapter. There is deliberately no `available`: an option that RELEASES capability without committing any is an option with no cost, which the asymmetry rule already refuses."
+              },
+              "for": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "default": null,
+                "description": "What it is committed to, in the world's terms — 'holding the far bay by hand', 'carrying the set by the lower route'."
+              },
+              "derivedFrom": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        "transfers_pressure_to": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null,
+          "description": "WHERE THE PRESSURE GOES. Canon's Chapter 1 does not remove pressure from the Bimaristan; it MOVES it — to emergency care, to a donating service, to the network, to the workforce. An option that protects something and transfers nothing has either had its cost omitted or is not a real option, and `deliberately_asymmetric` is the field for saying which."
+        },
+        "residue": {
+          "type": "array",
+          "default": [],
+          "description": "SG-1 C4. WHAT IS STILL TRUE AFTER THE INCIDENT CLOSES.\n\n⚠️ PER OPTION, NOT PER SCENE. `scene.residue` is one sentence about the scene, so three pathways with three different aftermaths shared one description of what was left behind — which is the same shape as three options sharing one consequence, and it is why the world did not appear to answer.\n\n★ AND EVERY ENTRY BINDS TO SOMETHING THAT CAN PERSIST. A residue that binds to nothing can be described and cannot be shown: it will not survive a return to the hub, it will not survive a resume, and the participant will be told what remains rather than finding it there.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "what",
+              "binds_to",
+              "derivedFrom"
+            ],
+            "properties": {
+              "what": {
+                "type": "string",
+                "minLength": 1
+              },
+              "binds_to": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind",
+                  "id"
+                ],
+                "properties": {
+                  "kind": {
+                    "enum": [
+                      "location",
+                      "route",
+                      "instrument",
+                      "person",
+                      "capability"
+                    ]
+                  },
+                  "id": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "description": "The thing in the world that carries it. Five kinds, because canon's Chapter 1 residues are exactly these: a bay whose board is locked out (location), a service route now relied on (route), a board that still cannot see the bay (instrument), a nurse still on recovery checks (person), and a mobile reserve that is not where it belongs (capability)."
+              },
+              "derivedFrom": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
         }
       }
     },

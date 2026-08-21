@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://citadel.contracts/schemas/story/instrument.schema.json",
+  "title": "Instrument",
+  "description": "SG-1 C2. A DIEGETIC OPERATIONAL INSTRUMENT — a physical object in the Bimaristan that reports something, with a source and a time.\n\n★ THE INSTRUMENT IS NOT WHERE THE READING LIVES. A reading is EVIDENCE: it has a source, it is held by a participant who went and looked, and it may be partial. Declaring readings here would create a second knowledge system beside `scene.evidence`, and the two would disagree the first time one was updated. So an instrument declares WHAT IT IS and WHAT IT MUST NEVER IMPLY, and `evidence[].reading` says what was read from it and in what state.\n\n★ AND `unavailable` IS A STATE, NOT AN ERROR. Canon builds this into the objects themselves: the Measure's weight room holds one weight per DECLARED dependency and 'shows nothing at all when a dependency was never declared'; a burned-out wick on the slate map 'reads exactly like a service that has stopped reporting'. The chapter's whole argument is that an instrument can be accurate and silent at the same time. An engine that models absence as failure cannot express it.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "name_key",
+    "object",
+    "text_equivalent_key",
+    "never_implies",
+    "derivedFrom"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^inst\\.",
+      "description": "Referenced by `evidence[].reading.instrument` and by `capability.how_known`."
+    },
+    "name_key": {
+      "type": "string",
+      "minLength": 1
+    },
+    "object": {
+      "type": "string",
+      "minLength": 1,
+      "description": "WHAT IT PHYSICALLY IS, from the sensory canon — a copper message rail with a station bell and an amber shutter; a slate map pierced with holes backed by oil wicks; glass columns of coloured water showing a ratio and not a count. Not decoration: the object's affordances and failure modes ARE the instrument's states, and inventing a screen instead would discard canon that has already done this work."
+    },
+    "comparable_with": {
+      "type": "array",
+      "default": [],
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^inst\\."
+      },
+      "description": "★ WHICH OTHER INSTRUMENTS THIS ONE CAN BE PLACED BESIDE. Comparison is the act that turns two true readings into a usable contradiction — the chapter turns on the Hall being right about the bus and wrong about the bay. An instrument comparable with nothing is a fact delivered, not a fact found."
+    },
+    "never_implies": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "description": "⛔ WHAT A READING FROM THIS INSTRUMENT MUST NOT BE TAKEN TO MEAN. Required and non-empty, because every one of these five instruments has a plausible misreading that the chapter is about: 'restored' is not 'the dependency is corrected'; an empty bed is not capability; 'battery available' is not safe care capability; a route on the map is not an open route; a preserved chronology is not a finding. A field nobody filled would be a rule that could never fire."
+    },
+    "text_equivalent_key": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The locale key for the complete non-visual peer — the reading, its source, its time, its state and its disagreement, in words. Declared with the instrument so an instrument cannot exist without one."
+    },
+    "unresolved": {
+      "type": ["string", "null"],
+      "default": null,
+      "description": "Where canon is silent about this object, say so here rather than inventing a default."
+    },
+    "derivedFrom": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}
