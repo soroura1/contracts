@@ -8,6 +8,21 @@ numbers, because no single file owned the sequence.
 |---|---|---|---|---|
 | **R0** | 🚧 in progress | — | — | Walking skeleton. Tasks: `citadel-planning/06-releases/R0-tasks.md` |
 
+## 2026-08-21 — reset to infrastructure
+
+The owner chose to start the product over. Every definition was deleted: all fifteen schemas, the
+refusal registry, the OpenAPI document, the lifecycle rules and fixtures, the generated types and
+the conformance suite. The machinery remains — the package, the repository check, the pipeline and
+the type generator.
+
+**No release was cut**, and the package version was set to `0.0.0` because there is nothing to
+version.
+
+★ **Every existing tag was kept, and that is what made the reset safe.** Consumers pin tags:
+`checklist-api` — live in production — pins `v0.2.2`, `identity-enrolment` and `checklist-app` pin
+`v0.2.1`, and `citadel` pins `v0.8.0`. A tag is immutable, so none of them can see this. **Do not
+delete the tags.**
+
 ## Rules
 
 1. A release is **closed or reopened, never left ambiguous.**
