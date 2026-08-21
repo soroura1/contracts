@@ -282,6 +282,32 @@ export type Traceback = {
     narrative: string;
   };
 
+/** SG-1 C3. AN OPERATIONAL CAPABILITY THE PARTICIPANT CAN COMMIT — and the reason opportunity in this product is not a resource bar. ★ A CAPABILITY IS A NAMED HOLDER IN A NAMED STATE. Never a pool, a meter, a budget, a point, a token or a countdown. Canon names time, trust, workload, service capacity and evidence as the currencies of this world and sets no prices for any of them; a number invites optimisation, which is the behaviour this product exists to make harder rather than easier. So there is no `amount` here, and no `remaining`, and adding one is a change to what the product is. What a capability has instead is a HOLDER — a person, a set of equipment, a route, a record — who can be somewhere, doing something, and who can therefore not be somewhere else. That exclusivity is the whole constraint, and it survives the removal of every clock, which is why the non-timed accessibility path carries the same trade-off rather than a relaxed one. */
+export type Capability = {
+    /** Referenced by a decision option's `commits`. Prefixed so a dangling reference is visible on sight. */
+    id: string;
+    /** The locale key. A capability the participant meets in one language only is a capability half the audience cannot reason about. */
+    name_key: string;
+    /** WHO OR WHAT HOLDS IT. A capability with no holder is a pool with a different name. */
+    held_by: {
+      kind: "person" | "equipment" | "route" | "record";
+      id: string;
+    };
+    /** What canon says is available, in canon's own terms — 'the roster safely covers about 28 while 30 are occupied', 'the set exists but must be found, verified and delivered'. Prose, deliberately: a figure copied out of canon into a field the engine can do arithmetic on is a quantity by the back door. */
+    available_state: string;
+    /** The instrument that reports its status. ★ A capability the participant cannot READ is a hidden variable, and a hidden variable that closes an option is the definition of an arbitrary game. */
+    how_known: string;
+    /** What commits it, in the world's terms. Not an exhaustive engine list — the authoritative binding is the option's own `commits`. */
+    consumed_by?: string[];
+    opens?: string[];
+    /** What becomes unavailable once it is committed. This is where the trade-off lives, and it is stated in words because canon states it in words. */
+    closes?: string[];
+    /** What remains after the incident closes. Null only where canon is silent — and where canon is silent, `unresolved` on the scene is the honest place for it. */
+    residue?: string | null;
+    /** The canon passage. Required, so a reviewer can see what is transcription and what is interpretation. */
+    derivedFrom: string;
+  };
+
 /** No user-visible string is ever a literal. */
 export type LocalisedText = {
     key: string;
@@ -303,6 +329,28 @@ export type Option = {
     effects: Effect[];
     /** EVS-4. FPE-05: option risks are available before commitment WHENEVER THE PLAYER'S ROLE COULD REASONABLY KNOW THEM. Until EVS-4 every risk was unconditionally visible, which reads as a briefing rather than as something learned. When this names evidence, the option's `risks` is withheld until the participant holds it — so investigating changes what the decision looks like. ⚠️ NOT EVERY OPTION MAY BE GATED. `protects` is never withheld, and a decision whose every risk is gated shows a participant who inspected nothing a set of options with no trade-offs at all — FPE-03 broken from the other side. The consumer enforces that; a schema cannot see across options. */
     risk_requires_evidence?: string[];
+    /** SG-1 C1/C3. WHAT THIS OPTION COMMITS, AND TO WHAT. ★ THIS IS WHERE AN OPTION STOPS BEING A SENTENCE AND STARTS BEING A STRATEGY. Before SG-1 every option was free: a participant who took every action and then chose was strictly better off than one who chose, so there was no choosing. An option commits named holders — hands, a set, a route, an engineer's presence, a copyist's attention — and a holder who is committed is somewhere, doing something, and is therefore not available for the other thing. ⛔ THERE IS NO AMOUNT HERE, AND ADDING ONE IS A CHANGE TO WHAT THE PRODUCT IS. Canon names time, trust, workload, service capacity and evidence and sets no prices. A quantity invites optimisation; exclusivity does not, and exclusivity survives the removal of every clock, which is what keeps the non-timed accessibility path carrying the same trade rather than a relaxed one. */
+    commits?: ({
+      /** The capability committed. Its shape is capability.schema.json, and its holder is declared there rather than repeated here. */
+      capability: string;
+      /** `committed` — the holder is doing this now and can be released later. `consumed` — it is gone for this chapter. There is deliberately no `available`: an option that RELEASES capability without committing any is an option with no cost, which the asymmetry rule already refuses. */
+      becomes: "committed" | "consumed";
+      /** What it is committed to, in the world's terms — 'holding the far bay by hand', 'carrying the set by the lower route'. */
+      for?: string | null;
+      derivedFrom: string;
+    })[];
+    /** WHERE THE PRESSURE GOES. Canon's Chapter 1 does not remove pressure from the Bimaristan; it MOVES it — to emergency care, to a donating service, to the network, to the workforce. An option that protects something and transfers nothing has either had its cost omitted or is not a real option, and `deliberately_asymmetric` is the field for saying which. */
+    transfers_pressure_to?: string | null;
+    /** SG-1 C4. WHAT IS STILL TRUE AFTER THE INCIDENT CLOSES. ⚠️ PER OPTION, NOT PER SCENE. `scene.residue` is one sentence about the scene, so three pathways with three different aftermaths shared one description of what was left behind — which is the same shape as three options sharing one consequence, and it is why the world did not appear to answer. ★ AND EVERY ENTRY BINDS TO SOMETHING THAT CAN PERSIST. A residue that binds to nothing can be described and cannot be shown: it will not survive a return to the hub, it will not survive a resume, and the participant will be told what remains rather than finding it there. */
+    residue?: ({
+      what: string;
+      /** The thing in the world that carries it. Five kinds, because canon's Chapter 1 residues are exactly these: a bay whose board is locked out (location), a service route now relied on (route), a board that still cannot see the bay (instrument), a nurse still on recovery checks (person), and a mobile reserve that is not where it belongs (capability). */
+      binds_to: {
+        kind: "location" | "route" | "instrument" | "person" | "capability";
+        id: string;
+      };
+      derivedFrom: string;
+    })[];
   };
 
 /** CORRECTION 2 (R3 B3). Effects were `up|down` plus a magnitude, which cannot express canon's enum state — `C1_CRITICAL_PATH = ED_HOLD | REDEPLOY | NETWORK_TRANSFER`. Operations are typed, and an enum operation must name both the variable and the value. */
@@ -333,6 +381,24 @@ export type Decision = {
     realistic_window?: string | null;
     /** At least two. One option is not a decision. */
     options: Option[];
+  };
+
+/** SG-1 C2. A DIEGETIC OPERATIONAL INSTRUMENT — a physical object in the Bimaristan that reports something, with a source and a time. ★ THE INSTRUMENT IS NOT WHERE THE READING LIVES. A reading is EVIDENCE: it has a source, it is held by a participant who went and looked, and it may be partial. Declaring readings here would create a second knowledge system beside `scene.evidence`, and the two would disagree the first time one was updated. So an instrument declares WHAT IT IS and WHAT IT MUST NEVER IMPLY, and `evidence[].reading` says what was read from it and in what state. ★ AND `unavailable` IS A STATE, NOT AN ERROR. Canon builds this into the objects themselves: the Measure's weight room holds one weight per DECLARED dependency and 'shows nothing at all when a dependency was never declared'; a burned-out wick on the slate map 'reads exactly like a service that has stopped reporting'. The chapter's whole argument is that an instrument can be accurate and silent at the same time. An engine that models absence as failure cannot express it. */
+export type Instrument = {
+    /** Referenced by `evidence[].reading.instrument` and by `capability.how_known`. */
+    id: string;
+    name_key: string;
+    /** WHAT IT PHYSICALLY IS, from the sensory canon — a copper message rail with a station bell and an amber shutter; a slate map pierced with holes backed by oil wicks; glass columns of coloured water showing a ratio and not a count. Not decoration: the object's affordances and failure modes ARE the instrument's states, and inventing a screen instead would discard canon that has already done this work. */
+    object: string;
+    /** ★ WHICH OTHER INSTRUMENTS THIS ONE CAN BE PLACED BESIDE. Comparison is the act that turns two true readings into a usable contradiction — the chapter turns on the Hall being right about the bus and wrong about the bay. An instrument comparable with nothing is a fact delivered, not a fact found. */
+    comparable_with?: string[];
+    /** ⛔ WHAT A READING FROM THIS INSTRUMENT MUST NOT BE TAKEN TO MEAN. Required and non-empty, because every one of these five instruments has a plausible misreading that the chapter is about: 'restored' is not 'the dependency is corrected'; an empty bed is not capability; 'battery available' is not safe care capability; a route on the map is not an open route; a preserved chronology is not a finding. A field nobody filled would be a rule that could never fire. */
+    never_implies: string[];
+    /** The locale key for the complete non-visual peer — the reading, its source, its time, its state and its disagreement, in words. Declared with the instrument so an instrument cannot exist without one. */
+    text_equivalent_key: string;
+    /** Where canon is silent about this object, say so here rather than inventing a default. */
+    unresolved?: string | null;
+    derivedFrom: string;
   };
 
 /** The eleven engine variables, which check-plan.sh asserts map 1:1 to canon's eleven persistent consequence threads. An invented variable name fails the plan mechanically. */
@@ -505,6 +571,49 @@ export type Scene = {
           field: string;
           why: string;
         }[];
+        /** SG-1 C4. THE RESPONSE BEAT AS FOUR ORDERED LAYERS. ★ THE ORDER IS THE CAUSALITY: the place changes, then an instrument changes or visibly fails to, then a committed holder is somewhere doing something, then a person reacts. Rendered in that order a participant sees cause; rendered as a paragraph they read a claim. `FPE-02` says a commitment receives an immediate causal response; this is the field that makes 'causal' something other than an adjective. ★ AND THE STRONGEST LAYER IS OFTEN THE INSTRUMENT THAT DOES NOT CHANGE. Bridge the bay with a mobile source and it is supplied while the critical-power board still shows it unsupplied, because the board watches declared circuits. A participant who notices that has learned the chapter's argument by observation, which no sentence can do for them — so `instrument` is a required key and may be explicitly null, never simply omitted. All four keys are required and each may be null. Required-and-nullable rather than optional, because an author who has nothing for a layer should have to say so. */
+        world_response?: {
+          /** What the place is like now. Light, equipment, posture, sound — the layer canon stages first: 'the environment changes before explanatory prose'. */
+          environment: {
+            key: string;
+            /** SG-1 C4. WHAT IN THE WORLD THIS CHANGED. A consequence that binds to nothing cannot persist, cannot be resumed and cannot be shown on the hub afterwards — it can only be described, which is the failure this release exists to correct. */
+            binds_to?: {
+              kind: "location" | "route" | "instrument" | "person" | "capability";
+              id: string;
+            } | null;
+            derivedFrom: string;
+          } | null;
+          /** What a reading now says — INCLUDING when the honest answer is that it says exactly what it said before, and should not. */
+          instrument: {
+            key: string;
+            /** SG-1 C4. WHAT IN THE WORLD THIS CHANGED. A consequence that binds to nothing cannot persist, cannot be resumed and cannot be shown on the hub afterwards — it can only be described, which is the failure this release exists to correct. */
+            binds_to?: {
+              kind: "location" | "route" | "instrument" | "person" | "capability";
+              id: string;
+            } | null;
+            derivedFrom: string;
+          } | null;
+          /** Where a committed capability now is. Whose hands, which set, which route, which marks. */
+          holder: {
+            key: string;
+            /** SG-1 C4. WHAT IN THE WORLD THIS CHANGED. A consequence that binds to nothing cannot persist, cannot be resumed and cannot be shown on the hub afterwards — it can only be described, which is the failure this release exists to correct. */
+            binds_to?: {
+              kind: "location" | "route" | "instrument" | "person" | "capability";
+              id: string;
+            } | null;
+            derivedFrom: string;
+          } | null;
+          /** Who reacted, and how. Canon authors character reactions for one Chapter 1 decision only; everywhere else this is null with the gap recorded, because a derived character reaction is an invented performance. */
+          person: {
+            key: string;
+            /** SG-1 C4. WHAT IN THE WORLD THIS CHANGED. A consequence that binds to nothing cannot persist, cannot be resumed and cannot be shown on the hub afterwards — it can only be described, which is the failure this release exists to correct. */
+            binds_to?: {
+              kind: "location" | "route" | "instrument" | "person" | "capability";
+              id: string;
+            } | null;
+            derivedFrom: string;
+          } | null;
+        } | null;
       })[];
     } | null;
     /** V7. WHERE THE SCENE SITS IN THE DAY, IN THE WORLD’S OWN CLOCK. Canon’s Chapter 1 contract gives the played duration as “First Bell to shortly after the Third Bell”, and each scene setup names its bell. Position told as “Scene 2 of 4” would be true of any content; this is true of this world. ⚠ THIS FIELD SHIPPED IN CONTENT BEFORE IT EXISTED HERE. `citadel` PR #25 added `bell` to all four Chapter 1 scenes; this schema is `additionalProperties: false`, so every one of those scenes was INVALID against the contract it pinned — and nothing found out, because citadel validated no content against the pinned schemas at all. EVS-1 added that validation and it failed on the first run. The gap was the check, not the field. THE ENUM IS CHAPTER 1’S BELLS. Each member has a locale string; a bell with no string renders as its own key at the reader. A chapter naming a fourth bell extends this enum and adds its string in the same change — which is the point of an enum rather than a free string. */
@@ -524,6 +633,15 @@ export type Scene = {
       satisfies_reveal?: string | null;
       /** The canon passage this was transcribed from. Required, so a reviewer can see what is canon and what is interpretation. */
       derivedFrom: string;
+      /** SG-1 C2. WHAT THIS EVIDENCE IS, READ AS AN INSTRUMENT STATE. ★ ONE KNOWLEDGE SPINE, NOT TWO. A reading is evidence — it has a source, it is held only by a participant who went and looked, and it may be partial. Adding a parallel `instrument_readings` array beside `evidence` would define what the participant knows in two places, and the two would disagree the first time one was updated. So an instrument reading IS a piece of evidence, with this object saying which instrument and in what state. Optional, because not all evidence comes off an instrument: Rami showing you a board behind an arch is a person, not a reading. */
+      reading?: {
+        /** The instrument this was read from. Must be an instrument the world declares; a reading of something that does not exist is a fact with a fictional provenance. */
+        instrument: string;
+        /** ⛔ `unavailable` IS A STATE, NOT AN ERROR, and it is the one this chapter is built on. The Hall's display does not see the failed downstream board; the Measure holds no weight for a dependency that was never declared; the message rail stops. Each of those is an accurate instrument saying nothing, and an engine that models silence as failure cannot express the difference between 'nothing is wrong' and 'nothing is being watched'. `conflicting` is the other load-bearing one: two readings that are both true and cannot both be acted on. */
+        state: "known" | "uncertain" | "conflicting" | "unavailable" | "changed";
+        /** Where in the incident's chronology this was read. Canon's electrical sequence has named marks — loss, generator running, main bus restored, the exception persisting, isolation and the manual feed. A mark, never a timestamp: the participant does not play against a clock, and a field holding seconds is a countdown waiting for someone to render it. */
+        mark?: string | null;
+      } | null;
     })[] | null;
     /** EVS-4. WHAT THE PARTICIPANT CAN DO BEFORE COMMITTING. ★ CANON ASKED FOR BOTH OF THESE BY NAME. Inspection: 'place detailed timings in OPTIONAL INSPECTION or the later review rather than long crisis dialogue.' Consultation: 'The selected role supplies one direct authority. The player must SEEK OTHER JUDGMENTS from named clinical, nursing, operational, safety, information, and city partners.' So the two action types are not a mechanic invented for a games checklist; they are how canon says the chapter is played. The third — commit — is `choice_or_discovery`, which already existed. */
     actions?: ({
@@ -560,6 +678,26 @@ export type Scene = {
     })[] | null;
     /** EVS-5. WHERE THE SCENE IS, AS REFERENCES. ⚠️ ALONGSIDE `locations`, NOT INSTEAD OF IT — and the duplication is deliberate. `locations` holds canon's own phrases: "older ICU far bay", "the service passage to the electrical transfer chamber". Those are the writer's voice and they belong in the scene. `location_ids` are the machine's, and they resolve against a place model that can say what is next door and what changed there. Replacing the prose with ids would lose canon's wording; matching the ids to the prose by string comparison would be a resemblance standing in for a reference, which is the mistake `required_reveals.evidence_ids` was added to avoid one field over. Same pattern as `derivedFrom`: the source stays, and the link is explicit. The place model itself is NOT here. Nothing but the game consumes locations, and VERSIONING.md is explicit that a rule no other service consumes buys nothing by being published (DEC-009). It lives in citadel as `src/content/places.json`. */
     location_ids?: string[];
+    /** SG-1 C5. WHAT A CHARACTER DOES, AND WHEN. ★ A WANT IS NOT A PERFORMANCE. `desire` says what each character wants; it is authoring data and it is what the current build renders — a bulleted list of six people's intentions, displayed before anything happens. Drama is those wants COLLIDING in front of the participant, so this array carries the acts: who speaks, who acts, who refuses, who qualifies, and who proceeds without the participant. ★ AND A REFUSAL IS NOT AN ERROR MESSAGE. Canon: 'the relevant professional explains the binding constraint and requires another pathway. This is authority, not a game hint.' A refusal here is a person exercising authority they hold, which is why it is a beat with a voice and not a validation failure with a tone. */
+    character_beats?: ({
+      id: string;
+      character_id: string;
+      /** Which beat it plays in. ⚠️ `entrance` is separate from `pre_commit` because canon controls entrances by name: 'Fadl and Maha enter after the first stabilization and electrical-isolation actions are under way; the scene does not wait for them before care begins.' A schema that cannot express a late entrance cannot refuse an early one. */
+      at: "entrance" | "pre_commit" | "interactive" | "post_commit" | "scene_exit";
+      /** ★ FIVE KINDS, BECAUSE THE DIFFERENCES ARE THE DRAMA. A refusal is a professional declining within their authority. A qualification is 'not until I can see the reserve, the accessories and who is using it' — an answer with a condition on it, which is Yasin's whole function. An independent_action is somebody doing their job WITHOUT the participant, which canon requires as its fail-forward rule and which no current beat can express. */
+      kind: "speech" | "action" | "refusal" | "qualification" | "independent_action";
+      /** What the beat performs — a want, a contradiction, a qualification, a refusal or a consequence. Non-empty is the test that the beat exists for a reason: 'no line exists only to recite the lesson' is the content rule, and a beat that cannot name what it performs is one. */
+      performs: string;
+      /** The locale key for what is said. Null for a beat that is purely action. */
+      line_key?: string | null;
+      /** ⚠️ WHERE THE LINE IS OWED. Canon authors the ACT — 'Fadl classifies the patient-safety event and sets quality follow-up without taking clinical or electrical authority' — and not the sentence. A speech beat must therefore carry either an authored line or an explicit record that one is owed. Silence in both fields would be a character opening their mouth and nothing coming out, shipped. */
+      dialogue_unresolved?: string | null;
+      /** The option id this beat belongs to, or null for a beat that plays whatever the participant commits to. This is how a character's behaviour DIVERGES by pathway rather than being narrated as having diverged. */
+      pathway?: string | null;
+      /** The condition under which an independent_action fires — canon's fail-forward rule is 'if the player delays or chooses an unsafe coordination approach'. Required for that kind, because an independent act with no trigger either never happens or always does, and both are the opposite of the mechanic. */
+      occurs_when?: string | null;
+      derivedFrom: string;
+    })[] | null;
   };
 
 /** Every refusal identifier in the ecosystem. A refusal not in this union does not exist. */

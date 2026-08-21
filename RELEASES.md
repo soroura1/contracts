@@ -15,6 +15,53 @@ numbers, because no single file owned the sequence.
    who did not build it.
 3. Cutting a tag does not deploy it. See [CONTRIBUTING.md](CONTRIBUTING.md) § *The deploy gate*.
 
+## v0.8.0 — strategy, instruments, capability and performed characters · SG-1
+
+**21 August 2026.** `DEC-031`. **Additive — every v0.7.x scene and decision still validates**, and a
+test asserts exactly that, because a minor version claiming to be additive and quietly invalidating
+content is how a consumer discovers a breaking change at runtime.
+
+### What was unrepresentable before
+
+The SG-1 product audit found the build's actions free and its consequences textual. Both were true
+of **the contract** first:
+
+| Could not be expressed | Now |
+|---|---|
+| An option that **commits** something | `option.commits` — a named capability moving to `committed` or `consumed` |
+| Where the pressure **went** | `option.transfers_pressure_to` |
+| What is still true **afterwards**, per pathway | `option.residue`, and every entry **binds to a location, route, instrument, person or capability** — a residue bound to nothing can be described and never shown |
+| An instrument that is **accurate and silent** | `evidence[].reading.state`, where `unavailable` is a state and not an error |
+| A capability the participant can **read** | `capability.schema.json`, whose `how_known` must name an instrument |
+| A character who **refuses, qualifies, or acts without you** | `scene.character_beats`, with five distinct kinds |
+| A commitment the world **answers in order** | `immediate_effect.responses[].world_response` — environment, instrument, holder, person |
+
+### ⛔ The two things this version makes impossible
+
+**A quantity.** `capability` has no `amount` and no `remaining`, and `commits` has no count; all
+three are refused by `additionalProperties: false` and tested. Canon names time, trust, workload,
+service capacity and evidence as this world's currencies and sets no prices for any of them. A number
+invites optimisation, which is the behaviour the product exists to make harder. Opportunity is a
+**named holder in a named state**, and its constraint is exclusivity — which survives the removal of
+every clock, and is why the non-timed accessibility path carries the same trade rather than a
+relaxed one.
+
+**A response layer omitted in silence.** `world_response` requires all four keys and permits each to
+be null. An author with nothing for the instrument layer has to say so, because the most valuable
+beat in this chapter is an instrument that **does not change**: bridge the affected bay with a
+mobile source and the critical-power board still shows it unsupplied, since the board watches
+declared circuits.
+
+### Where the objects came from
+
+Not designed. Transcribed. The sensory canon already builds every instrument this release needs —
+the copper message rail with its one, two and three taps and the amber shutter that means *sent, not
+answered*; the slate map whose burned-out wick reads exactly like a service that has stopped
+reporting; the column room showing a ratio and not a count; and the weight room, which holds one
+weight per **declared** dependency and therefore *"shows nothing at all when a dependency was never
+declared."* Chapter 1's hidden board was never declared. The instrument that would have caught it is
+correct, and silent.
+
 ## v0.7.0 — the asset slot becomes a declaration · EVS-5
 
 **20 August 2026.** `DEC-030`.

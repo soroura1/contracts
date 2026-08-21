@@ -736,6 +736,227 @@
                   }
                 },
                 "description": "Same convention as the scene's own `unresolved`: where canon is silent, say so rather than invent a default."
+              },
+              "world_response": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "default": null,
+                "additionalProperties": false,
+                "required": [
+                  "environment",
+                  "instrument",
+                  "holder",
+                  "person"
+                ],
+                "description": "SG-1 C4. THE RESPONSE BEAT AS FOUR ORDERED LAYERS.\n\n★ THE ORDER IS THE CAUSALITY: the place changes, then an instrument changes or visibly fails to, then a committed holder is somewhere doing something, then a person reacts. Rendered in that order a participant sees cause; rendered as a paragraph they read a claim. `FPE-02` says a commitment receives an immediate causal response; this is the field that makes 'causal' something other than an adjective.\n\n★ AND THE STRONGEST LAYER IS OFTEN THE INSTRUMENT THAT DOES NOT CHANGE. Bridge the bay with a mobile source and it is supplied while the critical-power board still shows it unsupplied, because the board watches declared circuits. A participant who notices that has learned the chapter's argument by observation, which no sentence can do for them — so `instrument` is a required key and may be explicitly null, never simply omitted.\n\nAll four keys are required and each may be null. Required-and-nullable rather than optional, because an author who has nothing for a layer should have to say so.",
+                "properties": {
+                  "environment": {
+                    "type": [
+                      "object",
+                      "null"
+                    ],
+                    "default": null,
+                    "additionalProperties": false,
+                    "required": [
+                      "key",
+                      "derivedFrom"
+                    ],
+                    "description": "What the place is like now. Light, equipment, posture, sound — the layer canon stages first: 'the environment changes before explanatory prose'.",
+                    "properties": {
+                      "key": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "binds_to": {
+                        "type": [
+                          "object",
+                          "null"
+                        ],
+                        "default": null,
+                        "additionalProperties": false,
+                        "required": [
+                          "kind",
+                          "id"
+                        ],
+                        "properties": {
+                          "kind": {
+                            "enum": [
+                              "location",
+                              "route",
+                              "instrument",
+                              "person",
+                              "capability"
+                            ]
+                          },
+                          "id": {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        },
+                        "description": "SG-1 C4. WHAT IN THE WORLD THIS CHANGED. A consequence that binds to nothing cannot persist, cannot be resumed and cannot be shown on the hub afterwards — it can only be described, which is the failure this release exists to correct."
+                      },
+                      "derivedFrom": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    }
+                  },
+                  "instrument": {
+                    "type": [
+                      "object",
+                      "null"
+                    ],
+                    "default": null,
+                    "additionalProperties": false,
+                    "required": [
+                      "key",
+                      "derivedFrom"
+                    ],
+                    "description": "What a reading now says — INCLUDING when the honest answer is that it says exactly what it said before, and should not.",
+                    "properties": {
+                      "key": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "binds_to": {
+                        "type": [
+                          "object",
+                          "null"
+                        ],
+                        "default": null,
+                        "additionalProperties": false,
+                        "required": [
+                          "kind",
+                          "id"
+                        ],
+                        "properties": {
+                          "kind": {
+                            "enum": [
+                              "location",
+                              "route",
+                              "instrument",
+                              "person",
+                              "capability"
+                            ]
+                          },
+                          "id": {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        },
+                        "description": "SG-1 C4. WHAT IN THE WORLD THIS CHANGED. A consequence that binds to nothing cannot persist, cannot be resumed and cannot be shown on the hub afterwards — it can only be described, which is the failure this release exists to correct."
+                      },
+                      "derivedFrom": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    }
+                  },
+                  "holder": {
+                    "type": [
+                      "object",
+                      "null"
+                    ],
+                    "default": null,
+                    "additionalProperties": false,
+                    "required": [
+                      "key",
+                      "derivedFrom"
+                    ],
+                    "description": "Where a committed capability now is. Whose hands, which set, which route, which marks.",
+                    "properties": {
+                      "key": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "binds_to": {
+                        "type": [
+                          "object",
+                          "null"
+                        ],
+                        "default": null,
+                        "additionalProperties": false,
+                        "required": [
+                          "kind",
+                          "id"
+                        ],
+                        "properties": {
+                          "kind": {
+                            "enum": [
+                              "location",
+                              "route",
+                              "instrument",
+                              "person",
+                              "capability"
+                            ]
+                          },
+                          "id": {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        },
+                        "description": "SG-1 C4. WHAT IN THE WORLD THIS CHANGED. A consequence that binds to nothing cannot persist, cannot be resumed and cannot be shown on the hub afterwards — it can only be described, which is the failure this release exists to correct."
+                      },
+                      "derivedFrom": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    }
+                  },
+                  "person": {
+                    "type": [
+                      "object",
+                      "null"
+                    ],
+                    "default": null,
+                    "additionalProperties": false,
+                    "required": [
+                      "key",
+                      "derivedFrom"
+                    ],
+                    "description": "Who reacted, and how. Canon authors character reactions for one Chapter 1 decision only; everywhere else this is null with the gap recorded, because a derived character reaction is an invented performance.",
+                    "properties": {
+                      "key": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "binds_to": {
+                        "type": [
+                          "object",
+                          "null"
+                        ],
+                        "default": null,
+                        "additionalProperties": false,
+                        "required": [
+                          "kind",
+                          "id"
+                        ],
+                        "properties": {
+                          "kind": {
+                            "enum": [
+                              "location",
+                              "route",
+                              "instrument",
+                              "person",
+                              "capability"
+                            ]
+                          },
+                          "id": {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        },
+                        "description": "SG-1 C4. WHAT IN THE WORLD THIS CHANGED. A consequence that binds to nothing cannot persist, cannot be resumed and cannot be shown on the hub afterwards — it can only be described, which is the failure this release exists to correct."
+                      },
+                      "derivedFrom": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    }
+                  }
+                }
               }
             },
             "allOf": [
@@ -851,6 +1072,44 @@
             "type": "string",
             "minLength": 1,
             "description": "The canon passage this was transcribed from. Required, so a reviewer can see what is canon and what is interpretation."
+          },
+          "reading": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "default": null,
+            "additionalProperties": false,
+            "required": [
+              "instrument",
+              "state"
+            ],
+            "description": "SG-1 C2. WHAT THIS EVIDENCE IS, READ AS AN INSTRUMENT STATE.\n\n★ ONE KNOWLEDGE SPINE, NOT TWO. A reading is evidence — it has a source, it is held only by a participant who went and looked, and it may be partial. Adding a parallel `instrument_readings` array beside `evidence` would define what the participant knows in two places, and the two would disagree the first time one was updated. So an instrument reading IS a piece of evidence, with this object saying which instrument and in what state.\n\nOptional, because not all evidence comes off an instrument: Rami showing you a board behind an arch is a person, not a reading.",
+            "properties": {
+              "instrument": {
+                "type": "string",
+                "pattern": "^inst\\.",
+                "description": "The instrument this was read from. Must be an instrument the world declares; a reading of something that does not exist is a fact with a fictional provenance."
+              },
+              "state": {
+                "enum": [
+                  "known",
+                  "uncertain",
+                  "conflicting",
+                  "unavailable",
+                  "changed"
+                ],
+                "description": "⛔ `unavailable` IS A STATE, NOT AN ERROR, and it is the one this chapter is built on. The Hall's display does not see the failed downstream board; the Measure holds no weight for a dependency that was never declared; the message rail stops. Each of those is an accurate instrument saying nothing, and an engine that models silence as failure cannot express the difference between 'nothing is wrong' and 'nothing is being watched'.\n\n`conflicting` is the other load-bearing one: two readings that are both true and cannot both be acted on."
+              },
+              "mark": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "default": null,
+                "description": "Where in the incident's chronology this was read. Canon's electrical sequence has named marks — loss, generator running, main bus restored, the exception persisting, isolation and the manual feed. A mark, never a timestamp: the participant does not play against a clock, and a field holding seconds is a countdown waiting for someone to render it."
+              }
+            }
           }
         }
       }
@@ -1025,6 +1284,158 @@
         "pattern": "^loc\\."
       },
       "description": "EVS-5. WHERE THE SCENE IS, AS REFERENCES.\n\n⚠️ ALONGSIDE `locations`, NOT INSTEAD OF IT — and the duplication is deliberate. `locations` holds canon's own phrases: \"older ICU far bay\", \"the service passage to the electrical transfer chamber\". Those are the writer's voice and they belong in the scene. `location_ids` are the machine's, and they resolve against a place model that can say what is next door and what changed there.\n\nReplacing the prose with ids would lose canon's wording; matching the ids to the prose by string comparison would be a resemblance standing in for a reference, which is the mistake `required_reveals.evidence_ids` was added to avoid one field over. Same pattern as `derivedFrom`: the source stays, and the link is explicit.\n\nThe place model itself is NOT here. Nothing but the game consumes locations, and VERSIONING.md is explicit that a rule no other service consumes buys nothing by being published (DEC-009). It lives in citadel as `src/content/places.json`."
+    },
+    "character_beats": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "default": null,
+      "description": "SG-1 C5. WHAT A CHARACTER DOES, AND WHEN.\n\n★ A WANT IS NOT A PERFORMANCE. `desire` says what each character wants; it is authoring data and it is what the current build renders — a bulleted list of six people's intentions, displayed before anything happens. Drama is those wants COLLIDING in front of the participant, so this array carries the acts: who speaks, who acts, who refuses, who qualifies, and who proceeds without the participant.\n\n★ AND A REFUSAL IS NOT AN ERROR MESSAGE. Canon: 'the relevant professional explains the binding constraint and requires another pathway. This is authority, not a game hint.' A refusal here is a person exercising authority they hold, which is why it is a beat with a voice and not a validation failure with a tone.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "character_id",
+          "at",
+          "kind",
+          "performs",
+          "derivedFrom"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "character_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "at": {
+            "enum": [
+              "entrance",
+              "pre_commit",
+              "interactive",
+              "post_commit",
+              "scene_exit"
+            ],
+            "description": "Which beat it plays in. ⚠️ `entrance` is separate from `pre_commit` because canon controls entrances by name: 'Fadl and Maha enter after the first stabilization and electrical-isolation actions are under way; the scene does not wait for them before care begins.' A schema that cannot express a late entrance cannot refuse an early one."
+          },
+          "kind": {
+            "enum": [
+              "speech",
+              "action",
+              "refusal",
+              "qualification",
+              "independent_action"
+            ],
+            "description": "★ FIVE KINDS, BECAUSE THE DIFFERENCES ARE THE DRAMA. A refusal is a professional declining within their authority. A qualification is 'not until I can see the reserve, the accessories and who is using it' — an answer with a condition on it, which is Yasin's whole function. An independent_action is somebody doing their job WITHOUT the participant, which canon requires as its fail-forward rule and which no current beat can express."
+          },
+          "performs": {
+            "type": "string",
+            "minLength": 1,
+            "description": "What the beat performs — a want, a contradiction, a qualification, a refusal or a consequence. Non-empty is the test that the beat exists for a reason: 'no line exists only to recite the lesson' is the content rule, and a beat that cannot name what it performs is one."
+          },
+          "line_key": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "default": null,
+            "description": "The locale key for what is said. Null for a beat that is purely action."
+          },
+          "dialogue_unresolved": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "default": null,
+            "description": "⚠️ WHERE THE LINE IS OWED. Canon authors the ACT — 'Fadl classifies the patient-safety event and sets quality follow-up without taking clinical or electrical authority' — and not the sentence. A speech beat must therefore carry either an authored line or an explicit record that one is owed. Silence in both fields would be a character opening their mouth and nothing coming out, shipped."
+          },
+          "pathway": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "default": null,
+            "description": "The option id this beat belongs to, or null for a beat that plays whatever the participant commits to. This is how a character's behaviour DIVERGES by pathway rather than being narrated as having diverged."
+          },
+          "occurs_when": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "default": null,
+            "description": "The condition under which an independent_action fires — canon's fail-forward rule is 'if the player delays or chooses an unsafe coordination approach'. Required for that kind, because an independent act with no trigger either never happens or always does, and both are the opposite of the mechanic."
+          },
+          "derivedFrom": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "kind": {
+                  "const": "speech"
+                }
+              },
+              "required": [
+                "kind"
+              ]
+            },
+            "then": {
+              "anyOf": [
+                {
+                  "required": [
+                    "line_key"
+                  ],
+                  "properties": {
+                    "line_key": {
+                      "type": "string"
+                    }
+                  }
+                },
+                {
+                  "required": [
+                    "dialogue_unresolved"
+                  ],
+                  "properties": {
+                    "dialogue_unresolved": {
+                      "type": "string"
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "kind": {
+                  "const": "independent_action"
+                }
+              },
+              "required": [
+                "kind"
+              ]
+            },
+            "then": {
+              "required": [
+                "occurs_when"
+              ],
+              "properties": {
+                "occurs_when": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          }
+        ]
+      }
     }
   },
   "$defs": {

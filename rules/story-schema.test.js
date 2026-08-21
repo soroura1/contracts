@@ -585,3 +585,258 @@ test('★ EVS-5 — a scene may name its locations as REFERENCES as well as pros
   s.location_ids = [];
   assert.equal(validateScene(s), false, 'a scene that names locations must name at least one');
 });
+
+// --- SG-1: strategy, instruments, capability and performed characters ---------
+//
+// ★ WHAT THESE TESTS PROTECT.
+//
+// The SG-1 product audit found that the build's actions were free and its
+// consequences were prose. Both were true of the CONTRACT before they were true
+// of the runtime: an option could commit nothing, a residue bound to nothing,
+// an instrument reading had nowhere to record that it was accurate and silent,
+// and a character had a want and no way to act on it.
+//
+// Every refusal below is paired with the corrected form being permitted, because
+// this repository has already shipped six rules that were correct and could never
+// fire.
+
+const validateCapability = ajv.compile(load('capability.schema.json'));
+const validateInstrument = ajv.compile(load('instrument.schema.json'));
+
+const capability = () => JSON.parse(readFileSync(join(here, 'fixtures/capability-valid.json'), 'utf8'));
+const instrument = () => JSON.parse(readFileSync(join(here, 'fixtures/instrument-valid.json'), 'utf8'));
+const strategy = () => {
+  const { _comment, ...fragment } =
+    JSON.parse(readFileSync(join(here, 'fixtures/scene-strategy.json'), 'utf8'));
+  return fragment;
+};
+const strategic = () => ({ ...scene(), ...strategy() });
+
+test('the SG-1 fixtures pass — without this, every refusal below is meaningless', () => {
+  assert.ok(validateCapability(capability()), JSON.stringify(validateCapability.errors));
+  assert.ok(validateInstrument(instrument()), JSON.stringify(validateInstrument.errors));
+  assert.ok(validateScene(strategic()), JSON.stringify(validateScene.errors));
+});
+
+test('SG-1 is ADDITIVE — a scene with none of it still validates, so v0.7.x content is untouched', () => {
+  assert.ok(validateScene(scene()), JSON.stringify(validateScene.errors));
+  assert.ok(validateDecision(decision()), JSON.stringify(validateDecision.errors));
+});
+
+// --- C3: opportunity is a named holder, never a quantity ----------------------
+
+test('★ C3 — a capability carrying an AMOUNT is refused; opportunity is not a resource bar', () => {
+  const c = capability();
+  c.amount = 4;
+  assert.equal(validateCapability(c), false, 'a quantity must not be representable');
+  delete c.amount;
+  c.remaining = 2;
+  assert.equal(validateCapability(c), false, 'neither must a remaining count');
+  delete c.remaining;
+  assert.ok(validateCapability(c), JSON.stringify(validateCapability.errors));
+});
+
+test('★ C3 — a capability the participant cannot READ is refused', () => {
+  // A hidden variable that closes an option is the definition of an arbitrary game.
+  const c = capability();
+  delete c.how_known;
+  assert.equal(validateCapability(c), false, 'a capability with no instrument is a hidden variable');
+
+  c.how_known = 'the nursing office';
+  assert.equal(validateCapability(c), false, 'and it must be an INSTRUMENT, not a place name');
+
+  c.how_known = 'inst.staffing-board';
+  assert.ok(validateCapability(c));
+});
+
+test('C3 — a capability must say where its account came from', () => {
+  const c = capability();
+  delete c.derivedFrom;
+  assert.equal(validateCapability(c), false, 'an invented constraint is indistinguishable from a canon one without this');
+});
+
+// --- C2: an instrument may be accurate and silent -----------------------------
+
+test('★ C2 — an instrument with nothing it must never imply is REFUSED', () => {
+  // Every one of the five has a plausible misreading that the chapter is about.
+  // An empty list is a rule that can never fire, which this repository has
+  // shipped before.
+  const i = instrument();
+  i.never_implies = [];
+  assert.equal(validateInstrument(i), false, 'an empty never_implies is a rule that cannot fire');
+
+  i.never_implies = ['that restored means the dependency is corrected'];
+  assert.ok(validateInstrument(i));
+});
+
+test('★ C2 — an instrument with no text peer cannot exist', () => {
+  const i = instrument();
+  delete i.text_equivalent_key;
+  assert.equal(validateInstrument(i), false, 'an instrument readable only by looking removes an access path');
+});
+
+test('★ C2 — `unavailable` is an expressible READING STATE, not an error', () => {
+  // The Measure holds no weight for a dependency that was never declared, so the
+  // instrument that would have caught the shared board shows nothing, correctly.
+  const s = scene();
+  s.evidence = [{
+    id: 'ev.01.02.no-declared-weight',
+    what: 'No weight hangs for this dependency, because it was never declared.',
+    source: { kind: 'instrument', id: 'the Measure' },
+    reading: { instrument: 'inst.critical-power', state: 'unavailable', mark: 'main-bus-restored' },
+    derivedFrom: "Canon, 02-world/sensory-canon-v0.1.md: 'the only part of the Measure that shows nothing at all when a dependency was never declared.'",
+  }];
+  assert.ok(validateScene(s), JSON.stringify(validateScene.errors));
+
+  s.evidence[0].reading.state = 'error';
+  assert.equal(validateScene(s), false, 'silence must not be modelled as failure');
+});
+
+test('C2 — a reading must name an instrument, and a TIMESTAMP is not a mark', () => {
+  const s = scene();
+  s.evidence = [{
+    id: 'ev.x', what: 'x', source: { kind: 'instrument', id: 'y' },
+    reading: { instrument: 'the Hall display', state: 'known' },
+    derivedFrom: 'z',
+  }];
+  assert.equal(validateScene(s), false, 'a reading must reference a declared instrument id');
+
+  s.evidence[0].reading.instrument = 'inst.critical-power';
+  assert.ok(validateScene(s), JSON.stringify(validateScene.errors));
+
+  s.evidence[0].reading.seconds = 18;
+  assert.equal(validateScene(s), false, 'a field holding seconds is a countdown waiting to be rendered');
+});
+
+// --- C1/C3: an option that commits nothing ------------------------------------
+
+test('★ C1 — an option may commit a capability, and a QUANTITY is unrepresentable', () => {
+  const d = decision();
+  d.options[0].commits = [{
+    capability: 'cap.staff-attention',
+    becomes: 'committed',
+    for: 'holding the far bay by hand',
+    derivedFrom: 'Canon, response approach A: consumes respiratory, nursing, biomedical and runner capacity.',
+  }];
+  assert.ok(validateDecision(d), JSON.stringify(validateDecision.errors));
+
+  d.options[0].commits[0].amount = 2;
+  assert.equal(validateDecision(d), false, 'a commitment must not carry a count');
+});
+
+test('★ C1 — a commitment that RELEASES capability without committing any is refused', () => {
+  // `becomes: available` would be an option with no cost, which is the thing the
+  // asymmetry rule already refuses one layer up.
+  const d = decision();
+  d.options[0].commits = [{ capability: 'cap.staff-attention', becomes: 'available', derivedFrom: 'x' }];
+  assert.equal(validateDecision(d), false);
+
+  d.options[0].commits[0].becomes = 'consumed';
+  assert.ok(validateDecision(d));
+});
+
+// --- C4: a consequence that binds to nothing cannot persist -------------------
+
+test('★ C4 — a residue that binds to nothing in the world is REFUSED', () => {
+  const d = decision();
+  d.options[0].residue = [{
+    what: 'One emergency resuscitation table remains unavailable.',
+    derivedFrom: 'Canon, response approach A.',
+  }];
+  assert.equal(validateDecision(d), false, 'a residue with no binding can be described and never shown');
+
+  d.options[0].residue[0].binds_to = { kind: 'location', id: 'loc.emergency-resuscitation' };
+  assert.ok(validateDecision(d), JSON.stringify(validateDecision.errors));
+});
+
+test('C4 — the five binding kinds are exactly canon\'s Chapter 1 residues', () => {
+  const d = decision();
+  const kinds = ['location', 'route', 'instrument', 'person', 'capability'];
+  for (const kind of kinds) {
+    d.options[0].residue = [{ what: 'x', binds_to: { kind, id: 'y' }, derivedFrom: 'z' }];
+    assert.ok(validateDecision(d), `${kind} must be bindable: ${JSON.stringify(validateDecision.errors)}`);
+  }
+  d.options[0].residue = [{ what: 'x', binds_to: { kind: 'mood', id: 'y' }, derivedFrom: 'z' }];
+  assert.equal(validateDecision(d), false, 'a residue must bind to something that can persist');
+});
+
+test('★ C4 — the response beat has four layers, and an author must SAY they have nothing', () => {
+  const s = scene();
+  s.immediate_effect = {
+    state_change_source: 'decision_effects',
+    responses: [{
+      option_id: 'opt-1',
+      narrative_response: null,
+      character_response: null,
+      derived_from: ['protects'],
+      unresolved: [{ field: 'narrative_response', why: 'canon authors no post-commitment narration' }],
+      world_response: {
+        environment: { key: 'resp.a.environment', derivedFrom: 'Canon: teams use manual and battery fallback.' },
+        instrument: null,
+        holder: null,
+        person: null,
+      },
+    }],
+  };
+  assert.ok(validateScene(s), JSON.stringify(validateScene.errors));
+
+  delete s.immediate_effect.responses[0].world_response.instrument;
+  assert.equal(validateScene(s), false, 'an omitted layer must be an explicit null, not a silence');
+});
+
+// --- C5: a want is not a performance -----------------------------------------
+
+test('★ C5 — a speech beat with no line AND no recorded gap is REFUSED', () => {
+  // Canon authors the act, not the sentence. A character opening their mouth
+  // with nothing in either field is a shipped silence.
+  const s = strategic();
+  s.character_beats.push({
+    id: 'beat.silent', character_id: 'Fadl', at: 'entrance', kind: 'speech',
+    performs: 'He asks for the event to be recognised without interrupting bedside work.',
+    derivedFrom: "Canon, Fadl's want.",
+  });
+  assert.equal(validateScene(s), false, 'a speech beat must carry a line or an explicit owed record');
+
+  s.character_beats.at(-1).dialogue_unresolved = 'The line is owed; canon authors the act only.';
+  assert.ok(validateScene(s), JSON.stringify(validateScene.errors));
+});
+
+test('★ C5 — an independent action with no trigger is REFUSED', () => {
+  // An independent act with no condition either never happens or always does,
+  // and both are the opposite of canon's fail-forward rule.
+  const s = strategic();
+  delete s.character_beats[1].occurs_when;
+  assert.equal(validateScene(s), false);
+
+  s.character_beats[1].occurs_when = 'The participant delays or chooses an unsafe coordination approach.';
+  assert.ok(validateScene(s));
+});
+
+test('★ C5 — refusal, qualification and independent action are DISTINCT kinds', () => {
+  // Collapsing them into "dialogue" is how a professional exercising authority
+  // becomes an error message.
+  const s = strategic();
+  for (const kind of ['speech', 'action', 'refusal', 'qualification', 'independent_action']) {
+    s.character_beats[0].kind = kind;
+    if (kind === 'independent_action') s.character_beats[0].occurs_when = 'the participant delays';
+    assert.ok(validateScene(s), `${kind}: ${JSON.stringify(validateScene.errors)}`);
+  }
+  s.character_beats[0].kind = 'dialogue';
+  assert.equal(validateScene(s), false, 'an undifferentiated dialogue kind must not exist');
+});
+
+test('★ C5 — a late entrance is expressible, because canon controls entrances by name', () => {
+  // "Fadl and Maha enter after the first stabilization and electrical-isolation
+  // actions are under way; the scene does not wait for them before care begins."
+  const s = strategic();
+  s.character_beats[0].at = 'entrance';
+  assert.ok(validateScene(s));
+  s.character_beats[0].at = 'whenever';
+  assert.equal(validateScene(s), false);
+});
+
+test('C5 — a beat that cannot say what it performs is refused', () => {
+  const s = strategic();
+  s.character_beats[0].performs = '';
+  assert.equal(validateScene(s), false, 'a beat existing for no reason is a line reciting the lesson');
+});
